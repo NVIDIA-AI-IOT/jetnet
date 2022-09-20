@@ -280,7 +280,7 @@ class YOLOXTRT(DetectionModel):
 
         model._decoder = model._module.head.decode_outputs
         # run model once to do some configuration
-        dummy_image = Image(PIL.Image.fromarray(np.zeros(self.model.input_size[::-1] + (3,), dtype=np.uint8)))
+        dummy_image = PIL.Image.fromarray(np.zeros(self.model.input_size[::-1] + (3,), dtype=np.uint8))
         model(dummy_image)
         model._module = module_trt
 
