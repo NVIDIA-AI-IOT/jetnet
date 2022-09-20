@@ -64,33 +64,31 @@ re-creating the model.
 For example, here's a dummy example for a classifier that returns
 a constant class label.
 
-=== "Definition (``cat_dog.py``)"
+```python
+class CatDogModel(ClassificationModel):
+    
+    def __init__(self, default_label: str):
+        self.default_label = default_label
 
-    ```python
-    class CatDogModel(ClassificationModel):
-        
-        def __init__(self, default_label: str):
-            self.default_label = default_label
+    def get_labels(self) -> Sequence[str]:
+        return ["cat", "dog"]
 
-        def get_labels(self) -> Sequence[str]:
-            return ["cat", "dog"]
+    def __call__(self, x: Image) -> Classification:
+        return Classification(
+            index=self.get_labels().index(self.default_label), 
+            label=self.default_label
+        )
 
-        def __call__(self, x: Image) -> Classification:
-            return Classification(
-                index=self.get_labels().index(self.default_label), 
-                label=self.default_label
-            )
+class CatDogModelConfig(ClassificationModelConfig):
+    
+    default_label: str
 
-    class CatDogModelConfig(ClassificationModelConfig):
-        
-        default_label: str
+    def build(self) -> CatDogModel:
+        return CatDogModel(self.default_label)
 
-        def build(self) -> CatDogModel:
-            return CatDogModel(self.default_label)
-
-    ALWAYS_DOG = CatDogModelConfig(default_label="dog")
-    ALWAYS_CAT = CatDogModelConfig(default_label="cat")
-    ```
+ALWAYS_DOG = CatDogModelConfig(default_label="dog")
+ALWAYS_CAT = CatDogModelConfig(default_label="cat")
+```
 
 We can then use the model with JetNet tools.
 
