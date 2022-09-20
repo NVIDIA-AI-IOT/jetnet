@@ -4,7 +4,7 @@
 <img src="https://user-images.githubusercontent.com/4212806/191137124-7dae37a3-a659-4e3e-8373-9a1c44b57e48.gif" style="max-height:160px;"/>
 <img src="https://user-images.githubusercontent.com/4212806/191136896-e42ab4d9-3a2f-4553-a1c7-49c59fc7e7a2.gif" style="max-height:160px;"/>
 
-JetNet is a collection of [models](models.md), [datasets](datasets.md),
+JetNet is a collection of [models](models.md), [datasets](datasets.md), and
 [tools](tools.md) that make it easy to explore neural networks on NVIDIA Jetson (and desktop too!). It can easily be used and extended with [Python](python/usage.md).  
 
 
