@@ -2,8 +2,6 @@ import pytest
 
 from jetnet.image import read_image
 from jetnet.torchvision import (
-    TorchvisionModelConfig,
-    TorchvisionTRTModelConfig,
     RESNET18_IMAGENET,
     RESNET18_IMAGENET_TRT,
     RESNET18_IMAGENET_TRT_FP16,

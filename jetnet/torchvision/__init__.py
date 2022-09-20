@@ -1,20 +1,19 @@
-from .torchvision_model_config import TorchvisionModelConfig
-from .torchvision_trt_model_config import TorchvisionTRTModelConfig
+from .torchvision import TorchvisionModel, TorchvisionModelTRT
 from jetnet.coco import COCO2017_VAL_IMAGES
 
 
 def _create_cfgs(name):
-    cfg = TorchvisionModelConfig(name=name, pretrained=True)
-    cfg_trt = TorchvisionTRTModelConfig(
+    cfg = TorchvisionModel(name=name, pretrained=True)
+    cfg_trt = TorchvisionModelTRT(
         model=cfg,
         engine_cache=f"data/torchvision/{name}_trt.pth"
     )
-    cfg_trt_fp16 = TorchvisionTRTModelConfig(
+    cfg_trt_fp16 = TorchvisionModelTRT(
         model=cfg,
         fp16_mode=True,
         engine_cache=f"data/torchvision/{name}_trt_fp16.pth"
     )
-    cfg_trt_int8 = TorchvisionTRTModelConfig(
+    cfg_trt_int8 = TorchvisionModelTRT(
         model=cfg,
         int8_mode=True,
         engine_cache=f"data/torchvision/{name}_trt_int8.pth",
