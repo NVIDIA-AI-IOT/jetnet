@@ -47,6 +47,13 @@ class Demo(object):
         self._thread = None
         self._model = cfg.model_config.build()
         self._cfg = cfg
+        self._camera = cv2.VideoCapture(self.camera_device)
+        re, image = self._camera.read()
+        if re:
+            self._image_shape = {"width": int(image.shape[1]), "height": int(image.shape[0])}
+        else:
+            self._camera.release()
+            raise RuntimeError("Could not read an image from the camera.")
 
     def run(self):
         self._sio = socketio.AsyncServer(async_mode="asgi")
@@ -75,10 +82,14 @@ class Demo(object):
     def exclude_image(self):
         return self._cfg.exclude_image
 
+    def get_image_shape(self, request):
+        return JSONResponse(self._image_shape)
+
     def routes(self):
         routes = [
             Route('/', self.index),
             Mount("/ws", self._sio_app),
+            Route("/image_shape", self.get_image_shape)
         ]
         return routes
 
@@ -95,10 +106,11 @@ class Demo(object):
     def _run_inference(self):
 
         loop = asyncio.new_event_loop()
-        camera = cv2.VideoCapture(self.camera_device)
+        camera = self._camera
         re, image = camera.read()
-
+        
         while self._running and re:
+            print(image.shape)
             image_jpeg = bytes(
                 cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 50])[1]
             )
