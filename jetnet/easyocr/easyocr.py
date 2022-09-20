@@ -1,3 +1,21 @@
+from typing import Sequence
+
+import torch
+
+import cv2
+import numpy as np
+
+from easyocr import Reader
+
+from jetnet.text_detection import (
+    TextDetection,
+    TextDetectionModel,
+    TextDetectionSet
+)
+from jetnet.polygon import Polygon
+from jetnet.point import Point
+from jetnet.image import Image
+from pydantic import PrivateAttr
 from torch2trt import torch2trt, trt, TRTModule
 from torch2trt.dataset import FolderDataset
 
@@ -15,33 +33,55 @@ from torch2trt import torch2trt, trt, TRTModule
 from torch2trt.dataset import FolderDataset
 
 import PIL.Image 
-from jetnet.config import Config
 from jetnet.dataset import Dataset
-from jetnet.image import Image, ImageDatasetConfig
-from jetnet.text_detection import TextDetectionModel, TextDetectionSet, TextDetectionModelConfig
+from jetnet.image import Image, ImageDataset
+from jetnet.text_detection import TextDetectionModel, TextDetectionSet
 from jetnet.utils import make_parent_dir
-from jetnet.tensorrt import trt_calib_algo_from_str, Int8CalibAlgo, trt_log_level_from_str, TrtLogLevel
-from jetnet.easyocr.easyocr_model import EasyOCRModel
-from jetnet.easyocr.easyocr_model_config import EasyOCRModelConfig
+from jetnet.tensorrt import (
+    trt_calib_algo_from_str, Int8CalibAlgo, 
+    trt_log_level_from_str, TrtLogLevel,
+    Torch2trtConfig
+)
 
 
-class EasyOCRTRTEngineConfig(Config):
-    int8_mode: bool = False
-    fp16_mode: bool = False
-    max_workspace_size: int = 1 << 26
-    engine_cache: Optional[str] = None
-    int8_calib_cache: Optional[str] = None
-    int8_num_calib: int = 16
-    int8_calib_algorithm: Int8CalibAlgo = "entropy_2"
-    min_shapes: Optional[Sequence[Sequence[int]]] = None
-    max_shapes: Optional[Sequence[Sequence[int]]] = None
-    opt_shapes: Optional[Sequence[Sequence[int]]] = None
-    use_onnx: bool = False
-    onnx_opset: int = 11
-    log_level: TrtLogLevel = "error"
+class EasyOCR(TextDetectionModel):
+    
+    lang_list: Sequence[str]
+
+    _reader = PrivateAttr()
+
+    def init(self):
+        self._reader = Reader(lang_list=self.lang_list)
+
+    @torch.no_grad()
+    def __call__(self, x: Image) -> TextDetectionSet:
+        image = x
+        data = np.array(image)
+
+        # RGB -> BGR
+        if image.mode == "RGB":
+            data = cv2.cvtColor(data, cv2.COLOR_RGB2BGR)
+
+        raw_output = self._reader.readtext(data)
+
+        detections = []
+
+        for raw_value in raw_output:
+            detection = TextDetection.construct(
+                boundary=Polygon.construct(points=[
+                    Point.construct(x=int(p[0]), y=int(p[1])) 
+                    for p in raw_value[0]
+                ]),
+                text=raw_value[1],
+                score=raw_value[2],
+            )
+            detections.append(detection)
+
+        return TextDetectionSet.construct(detections=detections)
 
 
-EASYOCR_TRT_DEFAULT_DETECTOR_CFG = EasyOCRTRTEngineConfig(
+
+EASYOCR_TRT_DEFAULT_DETECTOR_CFG = Torch2trtConfig(
     use_onnx=True,
     min_shapes=[(1, 3, 240, 320)],
     opt_shapes=[(1, 3, 720, 1280)],
@@ -49,20 +89,21 @@ EASYOCR_TRT_DEFAULT_DETECTOR_CFG = EasyOCRTRTEngineConfig(
     int8_calib_algorithm="minmax"
 )
 
-EASYOCR_TRT_DEFAULT_RECOGNIZER_CFG = EasyOCRTRTEngineConfig(
+EASYOCR_TRT_DEFAULT_RECOGNIZER_CFG = Torch2trtConfig(
     use_onnx=True,
     min_shapes=[(1, 1, 64, 32)],
     opt_shapes=[(1, 1, 64, 320)],
     max_shapes=[(1, 1, 64, 1920)]
 )
 
-class EasyOCRTRTModelConfig(TextDetectionModelConfig):
-    model: EasyOCRModelConfig
-    int8_calib_dataset: Optional[ImageDatasetConfig] = None
-    detector_config: Optional[EasyOCRTRTEngineConfig] = EASYOCR_TRT_DEFAULT_DETECTOR_CFG
-    recognizer_config: Optional[EasyOCRTRTEngineConfig] = EASYOCR_TRT_DEFAULT_RECOGNIZER_CFG
+
+class EasyOCRTRT(TextDetectionModel):
+    model: EasyOCR
+    int8_calib_dataset: Optional[ImageDataset] = None
+    detector_config: Optional[Torch2trtConfig] = EASYOCR_TRT_DEFAULT_DETECTOR_CFG
+    recognizer_config: Optional[Torch2trtConfig] = EASYOCR_TRT_DEFAULT_RECOGNIZER_CFG
     
-    def _build_trt(self, model, module, cfg: EasyOCRTRTEngineConfig, is_recog=False):
+    def _build_trt(self, model, module, cfg: Torch2trtConfig, is_recog=False):
         
         if cfg.engine_cache is not None and os.path.exists(cfg.engine_cache):
             module = TRTModule()
@@ -129,7 +170,7 @@ class EasyOCRTRTModelConfig(TextDetectionModelConfig):
 
         return module_trt
 
-    def build(self) -> EasyOCRModel:
+    def init(self):
         model = self.model.build()
 
         if self.detector_config is not None:
@@ -145,4 +186,8 @@ class EasyOCRTRTModelConfig(TextDetectionModelConfig):
         if self.recognizer_config is not None:
             model._reader.recognizer.module = rec_trt
 
-        return model
+        self.model = model
+        return self
+
+    def __call__(self, x: Image) -> TextDetectionSet:
+        return self.model(x)

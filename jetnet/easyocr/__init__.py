@@ -1,18 +1,18 @@
-from jetnet.easyocr.easyocr_model_config import EasyOCRModelConfig
-from jetnet.easyocr.easyocr_trt_model_config import (
-    EasyOCRTRTModelConfig,
-    EasyOCRTRTEngineConfig,
+from jetnet.easyocr.easyocr import (
+    EasyOCR,
+    EasyOCRTRT,
+    Torch2trtConfig,
     EASYOCR_TRT_DEFAULT_DETECTOR_CFG,
     EASYOCR_TRT_DEFAULT_RECOGNIZER_CFG
 )
 import jetnet.textocr
 
 
-EASYOCR_EN = EasyOCRModelConfig(
+EASYOCR_EN = EasyOCR(
     lang_list=["en"]
 )
 
-EASYOCR_EN_TRT = EasyOCRTRTModelConfig(
+EASYOCR_EN_TRT = EasyOCRTRT(
     model=EASYOCR_EN,
     int8_calib_dataset=jetnet.textocr.TEXTOCR_TEST_IMAGES,
     detector_config=EASYOCR_TRT_DEFAULT_DETECTOR_CFG.copy(update={
@@ -25,7 +25,7 @@ EASYOCR_EN_TRT = EasyOCRTRTModelConfig(
     })
 )
 
-EASYOCR_EN_TRT_FP16 = EasyOCRTRTModelConfig(
+EASYOCR_EN_TRT_FP16 = EasyOCRTRT(
     model=EASYOCR_EN,
     int8_calib_dataset=jetnet.textocr.TEXTOCR_TEST_IMAGES,
     detector_config=EASYOCR_TRT_DEFAULT_DETECTOR_CFG.copy(update={
@@ -40,7 +40,7 @@ EASYOCR_EN_TRT_FP16 = EasyOCRTRTModelConfig(
     })
 )
 
-EASYOCR_EN_TRT_INT8_FP16 = EasyOCRTRTModelConfig(
+EASYOCR_EN_TRT_INT8_FP16 = EasyOCRTRT(
     model=EASYOCR_EN,
     int8_calib_dataset=jetnet.textocr.TEXTOCR_TEST_IMAGES,
     detector_config=EASYOCR_TRT_DEFAULT_DETECTOR_CFG.copy(update={
