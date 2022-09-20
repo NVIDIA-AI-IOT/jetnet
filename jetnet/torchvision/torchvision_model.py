@@ -40,7 +40,7 @@ class TorchvisionModel(ClassificationModel):
     def __call__(self, x: Image) -> Classification:
         with torch.no_grad():
             tensor = (
-                torch.from_numpy(np.array(x.pil()))
+                torch.from_numpy(np.array(x))
                 .to(self._device)
                 .permute(2, 0, 1)
                 .float()

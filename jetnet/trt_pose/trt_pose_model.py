@@ -51,7 +51,7 @@ class TRTPoseModel(PoseModel):
 
     def __call__(self, x: Image) -> PoseSet:
         with torch.no_grad():
-            image = x.pil()
+            image = x
             width, height = image.width, image.height
             data = (
                 torch.from_numpy(np.asarray(image))

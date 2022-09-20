@@ -103,7 +103,7 @@ class Demo(object):
                 cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 50])[1]
             )
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            image = Image(PIL.Image.fromarray(image))
+            image = PIL.Image.fromarray(image)
             output = self.model(image)
             if not self.exclude_image:
                 loop.run_until_complete(self._sio.emit("image", image_jpeg))

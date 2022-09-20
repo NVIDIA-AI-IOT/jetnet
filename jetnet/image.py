@@ -13,32 +13,11 @@ import os
 import glob
 import shutil
 import tempfile
-
-
-class Image:
-
-    def __init__(self, value: PIL.Image.Image):
-        self._value = value
-
-    def pil(self) -> PIL.Image.Image:
-        return self._value
-
-    def jpeg(self) -> bytes:
-        with io.BytesIO() as f:
-            self.pil().save(f, format="JPEG")
-            return f.getvalue()
-
-    @classmethod
-    def from_jpeg(cls, data: bytes):
-        return Image(PIL.Image.open(io.BytesIO(data)))
-
-    @classmethod
-    def from_file(cls, path: str):
-        return Image(PIL.Image.open(path))
+from PIL.Image import Image
 
 
 def read_image(path: str):
-    return Image.from_file(path)
+    return PIL.Image.open(path)
 
 
 class ImageDataset(Dataset[Image]):

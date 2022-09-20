@@ -41,12 +41,12 @@ For example, here is how you would run a live web demo for different tasks
 === "Pose"
 
     ```bash
-    jetnet demo jetnet.trt_pose.RESNET18_BODY_224X224_TRT_FP16
+    jetnet demo jetnet.trt_pose.RESNET18_HAND_224X224_TRT_FP16
     ```
 
     and then open your browser to ``<ip_address>:8000`` to view the detections:
     
-    <img src="https://user-images.githubusercontent.com/4212806/191136450-4b2d55c1-c3c7-47d6-996e-11c62448747b.gif">
+    <img src="https://user-images.githubusercontent.com/4212806/191137124-7dae37a3-a659-4e3e-8373-9a1c44b57e48.gif">
 
 === "Text Detection"
 

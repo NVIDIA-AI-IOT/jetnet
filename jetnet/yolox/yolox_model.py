@@ -73,7 +73,7 @@ class YOLOXModel(DetectionModel):
 
     def __call__(self, x: Image) -> Sequence[Detection]:
         with torch.no_grad():
-            image = x.pil()
+            image = x
             width, height = image.width, image.height
             scale = 1.0 / min(self._input_size[1] / height, self._input_size[0] / width)
             data = self._to_tensor(image)

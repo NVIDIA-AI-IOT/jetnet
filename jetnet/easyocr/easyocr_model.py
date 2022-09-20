@@ -27,7 +27,7 @@ class EasyOCRModel(TextDetectionModel):
 
     @torch.no_grad()
     def __call__(self, x: Image) -> TextDetectionSet:
-        image = x.pil()
+        image = x
         data = np.array(image)
 
         # RGB -> BGR
