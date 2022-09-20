@@ -5,7 +5,7 @@
 JetNet is a collection of **models**, **datasets**,
 **tools** that make it easy to explore neural networks on NVIDIA Jetson (and desktop too!). It can easily be used and extended with **Python**.  
 
-Check out the [documentation]# to learn more and get started!
+Check out the [documentation](#) to learn more and get started!
 
 ### It's easy to use
 
