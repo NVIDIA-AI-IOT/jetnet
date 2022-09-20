@@ -1,5 +1,4 @@
-from jetnet.mmocr.mmocr_model import MMOCRModelConfig
-from jetnet.mmocr.mmocr_model_trt import MMOCRTRTModelConfig
+from jetnet.mmocr.mmocr import MMOCR, MMOCRTRT
 import jetnet.tensorrt
 import jetnet.textocr
 
@@ -71,26 +70,26 @@ MMOCR_REC_ROBUSTSCANNER_TRT_CFG_FP16 = MMOCR_REC_ROBUSTSCANNER_TRT_CFG.copy(upda
 
 # DBR18 - CRNN
 
-MMOCR_DB_R18_CRNN = MMOCRModelConfig(
+MMOCR_DB_R18_CRNN = MMOCR(
     detector="DB_r18",
     recognizer="CRNN"
 )
 
-MMOCR_DB_R18_CRNN_TRT = MMOCRTRTModelConfig(
+MMOCR_DB_R18_CRNN_TRT = MMOCRTRT(
     model=MMOCR_DB_R18_CRNN,
     int8_calib_dataset=jetnet.textocr.TEXTOCR_TEST_IMAGES,
     detector_config=MMOCR_DET_DB_R18_TRT_CFG,
     recognizer_config=MMOCR_REC_CRNN_TRT_CFG
 )
 
-MMOCR_DB_R18_CRNN_TRT_FP16 = MMOCRTRTModelConfig(
+MMOCR_DB_R18_CRNN_TRT_FP16 = MMOCRTRT(
     model=MMOCR_DB_R18_CRNN,
     int8_calib_dataset=jetnet.textocr.TEXTOCR_TEST_IMAGES,
     detector_config=MMOCR_DET_DB_R18_TRT_CFG_FP16,
     recognizer_config=MMOCR_REC_CRNN_TRT_CFG_FP16
 )
 
-MMOCR_DB_R18_CRNN_TRT_INT8_FP16 = MMOCRTRTModelConfig(
+MMOCR_DB_R18_CRNN_TRT_INT8_FP16 = MMOCRTRT(
     model=MMOCR_DB_R18_CRNN,
     int8_calib_dataset=jetnet.textocr.TEXTOCR_TEST_IMAGES,
     detector_config=MMOCR_DET_DB_R18_TRT_CFG_INT8,
@@ -98,26 +97,26 @@ MMOCR_DB_R18_CRNN_TRT_INT8_FP16 = MMOCRTRTModelConfig(
 )
 
 
-MMOCR_DB_R18_ROBUSTSCANNER = MMOCRModelConfig(
+MMOCR_DB_R18_ROBUSTSCANNER = MMOCR(
     detector="DB_r18",
     recognizer="CRNN"
 )
 
-MMOCR_DB_R18_ROBUSTSCANNER_TRT = MMOCRTRTModelConfig(
+MMOCR_DB_R18_ROBUSTSCANNER_TRT = MMOCRTRT(
     model=MMOCR_DB_R18_ROBUSTSCANNER,
     int8_calib_dataset=jetnet.textocr.TEXTOCR_TEST_IMAGES,
     detector_config=MMOCR_DET_DB_R18_TRT_CFG,
     recognizer_config=MMOCR_REC_ROBUSTSCANNER_TRT_CFG
 )
 
-MMOCR_DB_R18_ROBUSTSCANNER_TRT_FP16 = MMOCRTRTModelConfig(
+MMOCR_DB_R18_ROBUSTSCANNER_TRT_FP16 = MMOCRTRT(
     model=MMOCR_DB_R18_ROBUSTSCANNER,
     int8_calib_dataset=jetnet.textocr.TEXTOCR_TEST_IMAGES,
     detector_config=MMOCR_DET_DB_R18_TRT_CFG_FP16,
     recognizer_config=MMOCR_REC_ROBUSTSCANNER_TRT_CFG_FP16
 )
 
-MMOCR_DB_R18_ROBUSTSCANNER_TRT_INT8_FP16 = MMOCRTRTModelConfig(
+MMOCR_DB_R18_ROBUSTSCANNER_TRT_INT8_FP16 = MMOCRTRT(
     model=MMOCR_DB_R18_ROBUSTSCANNER,
     int8_calib_dataset=jetnet.textocr.TEXTOCR_TEST_IMAGES,
     detector_config=MMOCR_DET_DB_R18_TRT_CFG_INT8,
