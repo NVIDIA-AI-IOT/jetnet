@@ -17,9 +17,12 @@ def define_env(env):
         s = "| Class | Name | Config |\n"
         s += "|------|------|--------|\n"
         for config_str in config_strs:
-            config = import_object(config_str)
-            config_path = os.path.join('/configs/', '/'.join(config_str.split('.')) + '.json')
-            s += f"| {config.__class__.__name__} | {config_str} | [json]({config_path}) |\n"
+            try:
+                config = import_object(config_str)
+                config_path = os.path.join('/configs/', '/'.join(config_str.split('.')) + '.json')
+                s += f"| {config.__class__.__name__} | {config_str} | [json]({config_path}) |\n"
+            except:
+                print(f"could not import {config_str}")
         s += "\n"
         return s
 
@@ -49,14 +52,15 @@ def write_configs(root):
     "Post-build actions"
     
     for config_str in ALL_CONFIGS:
-
-        config = import_object(config_str)
-        path = os.path.join(root, '/'.join(config_str.split('.'))) + ".json"
-        make_parent_dir(path)
-        
-        with open(path, 'w') as f:
-            f.write(config.json(indent=2))
-
+        try:
+            config = import_object(config_str)
+            path = os.path.join(root, '/'.join(config_str.split('.'))) + ".json"
+            make_parent_dir(path)
+            
+            with open(path, 'w') as f:
+                f.write(config.json(indent=2))
+        except:
+            print(f"could not import {config_str}")
 
 def on_post_build(env):
     "Post-build actions"

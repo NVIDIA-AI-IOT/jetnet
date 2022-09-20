@@ -2,7 +2,6 @@ from abc import abstractmethod
 from pydantic import BaseModel
 from jetnet.image import Image
 from jetnet.model import Model
-from jetnet.config import Config
 
 
 from typing import Optional, Sequence
@@ -20,6 +19,3 @@ class ClassificationModel(Model[Image, Classification]):
     def get_labels(self) -> Sequence[str]:
         raise NotImplementedError
 
-
-class ClassificationModelConfig(Config[ClassificationModel]):
-    pass

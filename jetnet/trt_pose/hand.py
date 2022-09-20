@@ -1,6 +1,5 @@
 import jetnet.coco
-from jetnet.trt_pose.trt_pose_model_config import TRTPoseModelConfig
-from jetnet.trt_pose.trt_pose_trt_model_config import TRTPoseTRTModelConfig
+from jetnet.trt_pose.trt_pose import TRTPose, TRTPoseTRT
 
 
 HAND_KEYPOINTS = [
@@ -52,7 +51,7 @@ HAND_SKELETON = [
 ]
 
 def _create_cfgs(_base_alias, _input_size, _model_name, _weights_url):
-    _cfg = TRTPoseModelConfig(
+    _cfg = TRTPose(
         model=_model_name,
         input_size=_input_size,
         keypoints=HAND_KEYPOINTS,
@@ -60,7 +59,7 @@ def _create_cfgs(_base_alias, _input_size, _model_name, _weights_url):
         weights_url=_weights_url,
         weights_path=f"data/trt_pose/{_base_alias}.pth"
     )
-    _cfg_trt = TRTPoseTRTModelConfig(
+    _cfg_trt = TRTPoseTRT(
         model=_cfg,
         int8_calib_cache=f"data/trt_pose/{_base_alias}_calib",
         engine_cache=f"data/trt_pose/{_base_alias}_trt.pth",

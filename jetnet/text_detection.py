@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from jetnet.polygon import Polygon
 from jetnet.model import Model
 from jetnet.image import Image
-from jetnet.config import Config
 
 
 from typing import Optional, Sequence
@@ -21,6 +20,3 @@ class TextDetectionSet(BaseModel):
 class TextDetectionModel(Model[Image, TextDetectionSet]):
     pass
 
-
-class TextDetectionModelConfig(Config[TextDetectionModel]):
-    pass

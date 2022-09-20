@@ -1,10 +1,9 @@
-from jetnet.yolox.yolox_model_config import YOLOXModelConfig
-from jetnet.yolox.yolox_trt_model_config import YOLOXTRTModelConfig
+from jetnet.yolox.yolox import YOLOX, YOLOXTRT
 import jetnet.coco
 
 
 def _create_configs(_exp, _input_size):
-    _cfg = YOLOXModelConfig(
+    _cfg = YOLOX(
         exp=_exp,
         input_size=_input_size,
         labels=jetnet.coco.COCO_CLASSES,
@@ -14,7 +13,7 @@ def _create_configs(_exp, _input_size):
         weights_path=f"data/yolox/{_exp}.pth"
     )
 
-    _cfg_trt = YOLOXTRTModelConfig(
+    _cfg_trt = YOLOXTRT(
         model=_cfg, 
         engine_cache=f"data/yolox/{_exp}_trt.pth", 
         int8_calib_cache=f"data/yolox/{_exp}_calib",

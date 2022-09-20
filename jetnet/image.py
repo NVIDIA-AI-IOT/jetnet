@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
 from typing import Optional
+from pydantic import PrivateAttr
 
-from jetnet.config import Config
 from jetnet.dataset import Dataset
 from jetnet.utils import parent_dir, unzip, download
 
@@ -17,7 +17,7 @@ from PIL.Image import Image
 
 
 def read_image(path: str):
-    return PIL.Image.open(path)
+    return PIL.Image.open(path).convert("RGB")
 
 
 class ImageDataset(Dataset[Image]):
@@ -25,14 +25,16 @@ class ImageDataset(Dataset[Image]):
 
 
 class ImageFolder(ImageDataset):
+    path: str
+    recursive: bool = False
 
-    def __init__(self, path: str, recursive: bool = False):
-        self.path = path
-        self.recursive = recursive
-        prefix = "**" if recursive else "*"
-        image_paths = glob.glob(os.path.join(path, f"{prefix}.jpg"))
-        image_paths += glob.glob(os.path.join(path, f"{prefix}.png"))
-        image_paths += glob.glob(os.path.join(path, f"{prefix}.jpeg"))
+    _image_paths = PrivateAttr()
+    
+    def init(self):
+        prefix = "**" if self.recursive else "*"
+        image_paths = glob.glob(os.path.join(self.path, f"{prefix}.jpg"))
+        image_paths += glob.glob(os.path.join(self.path, f"{prefix}.png"))
+        image_paths += glob.glob(os.path.join(self.path, f"{prefix}.jpeg"))
         self._image_paths = image_paths
 
     def __len__(self) -> int:
@@ -42,38 +44,18 @@ class ImageFolder(ImageDataset):
         return read_image(self._image_paths[index])
 
 
-class ImageDatasetConfig(Config[ImageDataset]):
-    pass
+class RemoteImageFolder(ImageFolder):
 
-
-class ImageFolderConfig(ImageDatasetConfig):
-    path: str
-    recursive: bool = False
-
-    def build(self):
-        from jetnet.image import ImageFolder
-        
-        return ImageFolder(self.path, self.recursive)
-
-
-class RemoteImageFolderConfig(ImageDatasetConfig):
-
-    image_folder: ImageFolderConfig
     zip_url: str
     zip_folder: str
     zip_file: str
 
-    def build(self):
-        import os
-        import glob
-        import shutil
-        import tempfile
-        from jetnet.utils import download, unzip, parent_dir
+    def init(self):
 
         zip_url = self.zip_url
         zip_file = self.zip_file
         zip_folder = self.zip_folder
-        path = self.image_folder.path
+        path = self.path
 
         if zip_file is None:
             zip_file = os.path.join(tempfile.mkdtemp(), "images.zip")
@@ -98,4 +80,4 @@ class RemoteImageFolderConfig(ImageDatasetConfig):
 
             shutil.move(os.path.join(tmp, zip_folder), path)
 
-        return self.image_folder.build()
+        super().init()

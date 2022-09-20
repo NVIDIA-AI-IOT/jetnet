@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from jetnet.keypoint import Keypoint
 from jetnet.model import Model
 from jetnet.image import Image
-from jetnet.config import Config
 
 
 from abc import abstractmethod
@@ -27,6 +26,3 @@ class PoseModel(Model[Image, PoseSet]):
     def get_skeleton(self) -> Sequence[Tuple[int, int]]:
         raise NotImplementedError
 
-
-class PoseModelConfig(Config[PoseModel]):
-    pass

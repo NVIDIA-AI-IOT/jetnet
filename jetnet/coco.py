@@ -1,31 +1,30 @@
 from jetnet.image import (
-    RemoteImageFolderConfig,
-    ImageFolderConfig
+    RemoteImageFolder,
 )
 
 __all__ = [
     "COCO2017_VAL_IMAGES",
-    "coco2017_train_images",
-    "coco2017_test_images"
+    "COCO2017_TRAIN_IMAGES",
+    "COCO2017_TEST_IMAGES"
 ]
 
 
-COCO2017_VAL_IMAGES = RemoteImageFolderConfig(
-    image_folder=ImageFolderConfig(path="data/coco/val2017"),
+COCO2017_VAL_IMAGES = RemoteImageFolder(
+    path="data/coco/val2017",
     zip_url="http://images.cocodataset.org/zips/val2017.zip",
     zip_file="data/coco/val2017.zip",
     zip_folder="val2017"
 )
 
-COCO2017_TRAIN_IMAGES = RemoteImageFolderConfig(
-    image_folder=ImageFolderConfig(path="data/coco/train2017"),
+COCO2017_TRAIN_IMAGES = RemoteImageFolder(
+    path="data/coco/train2017",
     zip_url="http://images.cocodataset.org/zips/train2017.zip",
     zip_file="data/datasets/coco/train2017.zip",
     zip_folder="train2017"
 )
 
-COCO2017_TEST_IMAGES = RemoteImageFolderConfig(
-    image_folder=ImageFolderConfig(path="data/coco/test2017"),
+COCO2017_TEST_IMAGES = RemoteImageFolder(
+    path="data/coco/test2017",
     zip_url="http://images.cocodataset.org/zips/test2017.zip",
     zip_file="data/datasets/coco/test2017.zip",
     zip_folder="test2017"
