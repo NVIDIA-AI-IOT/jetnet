@@ -1,0 +1,31 @@
+{% extends "base.html.jinja" %}
+{% block output %}
+    output = JSON.parse(data);
+
+    overlayLayer.find("Text").forEach((x) => {x.destroy();});
+    overlayLayer.find("Label").forEach((x) => {x.destroy();});
+
+    var label = new Konva.Label({
+        x: 16,
+        y: 16,
+        opacity: 0.75
+    });
+
+    var tag = new Konva.Tag({
+        fill: '#76b900'
+    });
+
+    var text = new Konva.Text({
+        text: output.label,
+        fontSize: 24,
+        fontFamily: 'Calibri',
+        fill: 'white',
+        padding: 8
+    });
+
+    label.add(tag);
+    label.add(text);
+
+    overlayLayer.add(label);
+    overlayLayer.draw();
+{% endblock %}

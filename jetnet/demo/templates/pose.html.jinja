@@ -1,0 +1,63 @@
+{% extends "base.html.jinja" %}
+{% block setup %}
+
+    var pose_keypoints = null;
+    var pose_skeleton = null;
+
+    fetch('/skeleton')
+        .then((response) => response.json())
+        .then((data) => {
+            pose_skeleton = data;//JSON.parse(data);
+    });
+
+    fetch('/keypoints')
+        .then((response) => response.json())
+        .then((data) => {
+            pose_keypoints = data//JSON.parse(data);
+    });
+
+{% endblock %}
+{% block output %}
+
+    detection = JSON.parse(data);
+
+    overlayLayer.find("Line").forEach((line) => {line.destroy();});
+    overlayLayer.find("Text").forEach((text) => {text.destroy();});
+    overlayLayer.find("Circle").forEach((c) => {c.destroy();});
+
+    for (let i = 0; i < detection.poses.length; i++) {
+        var p = detection.poses[i];
+        var pts = p.keypoints;
+        var points = [];
+        for (let j = 0; j < pts.length; j++) {
+            points.push(pts[j].x, pts[j].y);
+        }
+        for (let j = 0; j < pts.length; j++) {
+            var circ = new Konva.Circle({
+                x: pts[j].x,
+                y: pts[j].y,
+                fill: '#76b900',
+                radius: 5
+            });
+            overlayLayer.add(circ);
+        }
+        if (pose_skeleton !== null) {
+
+            for (let k = 0; k < pose_skeleton.length; k++) {
+                var sk = pose_skeleton[k];
+                var pt_a = pts.find(pt => pt.index === sk[0]);
+                var pt_b = pts.find(pt => pt.index === sk[1]);
+                if (pt_a && pt_b) {
+                    var sk_line = new Konva.Line({
+                        points: [pt_a.x, pt_a.y, pt_b.x, pt_b.y],
+                        closed: false,
+                        stroke: '#76b900',
+                        strokeWidth: 2
+                    });
+                    overlayLayer.add(sk_line);
+                }
+            }
+        }
+    }
+    overlayLayer.draw();
+{% endblock %}

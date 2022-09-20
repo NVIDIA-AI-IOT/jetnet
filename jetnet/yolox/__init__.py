@@ -1,0 +1,34 @@
+from jetnet.yolox.yolox_model_config import YOLOXModelConfig
+from jetnet.yolox.yolox_trt_model_config import YOLOXTRTModelConfig
+import jetnet.coco
+
+
+def _create_configs(_exp, _input_size):
+    _cfg = YOLOXModelConfig(
+        exp=_exp,
+        input_size=_input_size,
+        labels=jetnet.coco.COCO_CLASSES,
+        conf_thresh=0.3,
+        nms_thresh=0.3,
+        weights_url=f"https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/{_exp}.pth",
+        weights_path=f"data/yolox/{_exp}.pth"
+    )
+
+    _cfg_trt = YOLOXTRTModelConfig(
+        model=_cfg, 
+        engine_cache=f"data/yolox/{_exp}_trt.pth", 
+        int8_calib_cache=f"data/yolox/{_exp}_calib",
+        int8_calib_dataset=jetnet.coco.COCO2017_VAL_IMAGES
+    )
+    _cfg_trt_fp16 = _cfg_trt.copy(update={"fp16_mode": True, f"engine_cache": f"data/yolox/{_exp}_trt_fp16.pth"})
+    _cfg_trt_int8 = _cfg_trt.copy(update={"int8_mode": True, f"engine_cache": f"data/yolox/{_exp}_trt_int8.pth"})
+
+    return (_cfg, _cfg_trt, _cfg_trt_fp16, _cfg_trt_int8)
+
+
+YOLOX_L, YOLOX_L_TRT, YOLOX_L_TRT_FP16, YOLOX_L_TRT_INT8 = _create_configs("yolox_l", (640, 640))
+YOLOX_M, YOLOX_M_TRT, YOLOX_M_TRT_FP16, YOLOX_M_TRT_INT8 = _create_configs("yolox_m", (640, 640))
+YOLOX_S, YOLOX_S_TRT, YOLOX_S_TRT_FP16, YOLOX_S_TRT_INT8 = _create_configs("yolox_s", (640, 640))
+YOLOX_X, YOLOX_X_TRT, YOLOX_X_TRT_FP16, YOLOX_X_TRT_INT8 = _create_configs("yolox_x", (640, 640))
+YOLOX_TINY, YOLOX_TINY_TRT, YOLOX_TINY_TRT_FP16, YOLOX_TINY_TRT_INT8 = _create_configs("yolox_tiny", (416, 416))
+YOLOX_NANO, YOLOX_NANO_TRT, YOLOX_NANO_TRT_FP16, YOLOX_NANO_TRT_INT8 = _create_configs("yolox_nano", (416, 416))

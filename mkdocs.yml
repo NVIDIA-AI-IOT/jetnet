@@ -1,0 +1,39 @@
+site_name: JetNet
+
+theme:
+  name: "material"
+  palette:
+    primary: light-green
+  features:
+    - content.tabs.link
+    - content.code.annotate
+
+markdown_extensions:
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - attr_list
+  - md_in_html
+  - def_list
+  - pymdownx.superfences:
+  - pymdownx.tabbed:
+      alternate_style: true
+
+plugins:
+  - search
+  - macros
+
+nav:
+  - Home: index.md
+  - Setup: setup.md
+  - Tools: tools.md
+  - Models: models.md
+  - Datasets: datasets.md
+  - Python: 
+    - Usage: python/usage.md
+    - Reference: python/reference.md

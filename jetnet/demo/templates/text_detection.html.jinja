@@ -1,0 +1,42 @@
+{% extends "base.html.jinja" %}
+{% block setup %}
+
+{% endblock %}
+{% block output %}
+    det = JSON.parse(data);
+    overlayLayer.find("Line").forEach((line) => {line.destroy();});
+    overlayLayer.find("Text").forEach((text) => {text.destroy();});
+    for (let i = 0; i < det.detections.length; i++) {
+        var p = det.detections[i];
+        var pts = p.boundary.points;
+        var points = [];
+        for (let j = 0; j < pts.length; j++) {
+            points.push(pts[j].x, pts[j].y);
+        }
+        var poly = new Konva.Line({
+            points: points,
+            closed: true,
+            fill: '#76b900',
+            opacity: 0.25
+        })
+        var outline = new Konva.Line({
+            points: points,
+            closed: true,
+            stroke: 'white',
+            strokeWidth: 2
+        })
+        var text = new Konva.Text({
+            x: pts[0].x,
+            y: pts[0].y,
+            text: p.text,
+            fontSize: 16,
+            fontFamily: 'Calibri',
+            fill: '#76b900',
+            stroke: 'white',
+            strokeWidth: 1
+        });
+        overlayLayer.add(poly);
+        overlayLayer.add(outline);
+        overlayLayer.add(text);
+    }
+{% endblock %}
