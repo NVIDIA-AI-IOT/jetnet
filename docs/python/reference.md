@@ -82,25 +82,13 @@ class TextDetectionSet:
 
 ## Abstract Types
 
-### Config
-
-Models, datasets and other types in JetNet often have ``Config`` counterparts that make them 
-more configurable, easily reproducible, and usable with command line tools.  Configs
-are [pydantic](https://pydantic-docs.helpmanual.io/) models with a ``build`` method
-than may be used to create the resource.  Configs are restricted to JSON serializable types (like int, list, and other pydantic models), 
-which ensures they configurations are portable, easily interpretable, and configurable.
-
-```python
-class Config(BaseModel):
-
-    def build(self):
-        raise NotImplementedError
-```
-
 ### ClassificationModel
 
 ```python3
 class ClassificationModel:
+
+    def init(self):
+        pass
 
     def get_labels(self) -> Sequence[str]:
         raise NotImplementedError
@@ -114,6 +102,9 @@ class ClassificationModel:
 ```python3
 class DetectionModel:
 
+    def init(self):
+        pass
+
     def get_labels(self) -> Sequence[str]:
         raise NotImplementedError
       
@@ -125,6 +116,9 @@ class DetectionModel:
 
 ```python3
 class PoseModel:
+
+    def init(self):
+        pass
 
     def get_keypoints(self) -> Sequence[str]:
         raise NotImplementedError
@@ -141,6 +135,9 @@ class PoseModel:
 ```python3
 class TextDetectionModel:
 
+    def init(self):
+        pass
+
     def __call__(self, index: Image) -> TextDetectionSet:
         raise NotImplementedError
 ```
@@ -150,6 +147,9 @@ class TextDetectionModel:
 ```python3
 class ImageDataset:
 
+    def init(self):
+        pass
+        
     def __len__(self) -> int:
         raise NotImplementedError
 

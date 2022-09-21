@@ -114,7 +114,7 @@ a new interface for each one.
 
 ### It's highly reproducible and configurable
 
-JetNet uses well-defined configurations to explicitly describe all the steps needed to automatically re-produce a [model](model).  This includes steps like downloading weights, downloading calibration data and optimizing with TensorRT, that often aren't captured in open-source model definitons.  These configurations are defined with ``pydantic`` using JSON serializable so they can be easily validated, modified, exported, and re-used.
+JetNet models are defined as ``pydantic`` types, which means they they can be easily validated, modified, and exported to JSON.  The models include an ``init`` function which is used to perform all steps necessary to prepare the model for execution, like downloading weights, downloading calibration data and optimizing with TensorRT.  
 
 For example, the following models, which include TensorRT optimization can be re-created with a single line
 
@@ -173,47 +173,40 @@ Check out the <a href="setup">Setup</a> page for details.
 
 JetNet is written with <a href="python/usage">Python</a> so that it is easy
 to extend.  If you want to use the JetNet tools with a different model, or are
-considering contributing to the project to help other developers easily use your model, all you need to do is implement one of the JetNet [interfaces](python/reference/#abstract-types) and define a config for
-re-creating the model.  
+considering contributing to the project to help other developers easily use your model, all you need to do is implement one of the JetNet [interfaces](python/reference/#abstract-types).
 
-For example, here's a dummy example for a classifier that returns
-a constant class label.
+For example, here's how we might define a new classification model
 
 === "Definition (``cat_dog.py``)"
 
     ```python
+    from pydantic import PrivateAttr
+
     class CatDogModel(ClassificationModel):
         
-        def __init__(self, default_label: str):
-            self.default_label = default_label
+        num_layers: int
+
+        # private attributes can be non-JSON types, like a PyTorch module
+        _torch_module = PrivateAttr()
+        
+        def init(self):
+            # code to initialize model for execution
 
         def get_labels(self) -> Sequence[str]:
             return ["cat", "dog"]
 
         def __call__(self, x: Image) -> Classification:
-            return Classification(
-                index=self.get_labels().index(self.default_label), 
-                label=self.default_label
-            )
+            # code to classify image
 
-    class CatDogModelConfig(ClassificationModelConfig):
-        
-        default_label: str
-
-        def build(self) -> CatDogModel:
-            return CatDogModel(self.default_label)
-
-    ALWAYS_DOG = CatDogModelConfig(default_label="dog")
-    ALWAYS_CAT = CatDogModelConfig(default_label="cat")
+    CATDOG_SMALL = CatDogModel(num_layers=10)
+    CATDOG_BIG = CatDogModel(num_layers=50)
     ```
 
 We can then use the model with JetNet tools.
 
 ```bash
-jetnet demo cat_dog.ALWAYS_CAT
+jetnet demo cat_dog.CATDOG_SMALL
 ```
-
-For real examples check out the GitHub.
 
 ## Get Started!
 

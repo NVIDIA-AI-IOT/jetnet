@@ -64,23 +64,23 @@ print(output.json(indent=2))
 
 ### Customize a model
 
-You can customize the model by copying the config and modifying it before building
+You can customize the model by copying and modifying it before building
 
 ```python3
-config = YOLOX_TINY_TRT_FP16.copy(deep=True)
+model = YOLOX_TINY_TRT_FP16.copy(deep=True)
 
-config.model.input_size = (1280, 736)
-config.engine_cache = "data/custom_model.pth"
+model.model.input_size = (1280, 736)
+model.engine_cache = "data/custom_model.pth"
 
-model = config.build()
+model = model.build()
 ```
 
-### Dump a model config to JSON
+### Dump a model to JSON
 
-All configurations are JSON serializable, so we can view the model config like this
+All models are JSON serializable, so we can view the model like this
 
 ```python3
-print(custom_model_config.json(indent=2))
+print(model.json(indent=2))
 ```
 
 <details>
@@ -207,43 +207,34 @@ print(custom_model_config.json(indent=2))
 
 You can create your own model by subclassing the related base model for the task. For example,
 
-```python3
-from PIL.Image import Image
-from jetnet.classification import ClassificationModel, Classification
-
+```python
+from pydantic import PrivateAttr
 
 class CatDogModel(ClassificationModel):
+    
+    num_layers: int
+
+    # private attributes can be non-JSON types, like a PyTorch module
+    _torch_module = PrivateAttr()
+    
+    def init(self):
+        # code to initialize model for execution
 
     def get_labels(self) -> Sequence[str]:
         return ["cat", "dog"]
-    
+
     def __call__(self, x: Image) -> Classification:
-        # code to classify image...
+        # code to classify image
 ```
 
-For use with the command line tools, and to make the model easily configurable and re-usable, 
-you can create an associated ``Config`` and define the parameters and ``build`` method.
+You can then define some instances of your model
 
 ```python3
-from jetnet.classification import ClassificationModelConfig
-
-
-class CatDogModelConfig(ClassificationModelConfig):
-
-    num_layers: int
-
-    def build(self) -> CatDogModel:
-        # code to create model...
+CAT_DOG_SMALL = CatDogModel(num_layers=10)
+CAT_DOG_BIG = CatDogModel(num_layers=50)
 ```
 
-You can then define some configurations of your model
-
-```python3
-CAT_DOG_SMALL = CatDogModelConfig(num_layers=10)
-CAT_DOG_BIG = CatDogModelConfig(num_layers=50)
-```
-
-If the model config can be imported in Python, it can be used
+If the model can be imported in Python, it can be used
 with the command line tools.  Suppose we have our models defined in ``./cat_dog.py``,
 we could use a model like this
 
@@ -286,14 +277,7 @@ If you have images in a folder, you can create a dataset
 for them like this
 
 ```python3
-dataset = ImageFolder(path="images")
-```
-
-If you want to use them with the command line tools, you'll
-want to create a config that can be used to build the dataset
-
-```python3
-CAT_DOG_IMAGES = ImageFolderConfig(path="images")
+CAT_DOG_IMAGES = ImageFolder(path="images")
 ```
 
 Assuming this is defined in ``./cat_dog.py`` you could then
@@ -303,7 +287,7 @@ use it with the command line tools like this
 jetnet profile cat_dog.CAT_DOG_SMALL cat_dog.CAT_DOG_IMAGES
 ```
 
-> It's worth checking out the RemoteImageFolderConfig, so
+> It's worth checking out the RemoteImageFolder, so
 > you can store your images remotely, and automatically
 > download it.  This will make your dataset more reproducible.
 
@@ -316,8 +300,10 @@ can create your own dataset class like this
 ```python3
 from jetnet.image import ImageDataset
 
-
 class CatDogImages(ImageDataset):
+
+    def init(self):
+        # code to prepare dataset for reading, ie: downloading data
 
     def __len__(self) -> int:
         # code to get length of dataset
@@ -325,7 +311,3 @@ class CatDogImages(ImageDataset):
     def __getitem__(self) -> Image:
         # code to read sample from dataset
 ```
-
-Similar to the model, you can define a config for building the dataset
-so it can be used with the command line tools.
-

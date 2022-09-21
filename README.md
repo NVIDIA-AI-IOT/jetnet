@@ -61,40 +61,39 @@ to extend.  If you want to use the JetNet tools with a different model, or are
 considering contributing to the project to help other developers easily use your model, all you need to do is implement one of the JetNet interfaces and define a config for
 re-creating the model.  
 
-For example, here's a dummy example for a classifier that returns
-a constant class label.
+For example, here's how we might define a new classification model
 
-```python
-class CatDogModel(ClassificationModel):
-    
-    def __init__(self, default_label: str):
-        self.default_label = default_label
+=== "Definition (``cat_dog.py``)"
 
-    def get_labels(self) -> Sequence[str]:
-        return ["cat", "dog"]
+    ```python
+    from pydantic import PrivateAttr
 
-    def __call__(self, x: Image) -> Classification:
-        return Classification(
-            index=self.get_labels().index(self.default_label), 
-            label=self.default_label
-        )
+    class CatDogModel(ClassificationModel):
+        
+        num_layers: int
 
-class CatDogModelConfig(ClassificationModelConfig):
-    
-    default_label: str
+        # private attributes can be non-JSON types, like a PyTorch module
+        _torch_module = PrivateAttr()
+        
+        def init(self):
+            # code to initialize model for execution
 
-    def build(self) -> CatDogModel:
-        return CatDogModel(self.default_label)
+        def get_labels(self) -> Sequence[str]:
+            return ["cat", "dog"]
 
-ALWAYS_DOG = CatDogModelConfig(default_label="dog")
-ALWAYS_CAT = CatDogModelConfig(default_label="cat")
-```
+        def __call__(self, x: Image) -> Classification:
+            # code to classify image
+
+    CATDOG_SMALL = CatDogModel(num_layers=10)
+    CATDOG_BIG = CatDogModel(num_layers=50)
+    ```
 
 We can then use the model with JetNet tools.
 
 ```bash
-jetnet demo cat_dog.ALWAYS_CAT
+jetnet demo cat_dog.CATDOG_SMALL
 ```
+
 
 
 ## Get Started!

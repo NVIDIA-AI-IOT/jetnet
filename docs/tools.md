@@ -1,7 +1,7 @@
 Pick a pre-defined [model](models.md) and use it with these tools.
 For this example, we'll use the ``jetnet.trt_pose.RESNET18_BODY_224X224_TRT_FP16`` model.
 
-> You can also define your our own config and use it with these
+> You can also define your our own model or dataset and use it with these
 > tools as long as it can be imported in Python.
 
 ### Build
