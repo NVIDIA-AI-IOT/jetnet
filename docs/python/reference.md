@@ -93,7 +93,7 @@ class ClassificationModel:
     def get_labels(self) -> Sequence[str]:
         raise NotImplementedError
       
-    def __call__(self, index: Image) -> Classification:
+    def __call__(self, x: Image) -> Classification:
         raise NotImplementedError
 ```
 
@@ -108,7 +108,7 @@ class DetectionModel:
     def get_labels(self) -> Sequence[str]:
         raise NotImplementedError
       
-    def __call__(self, index: Image) -> DetectionSet:
+    def __call__(self, x: Image) -> DetectionSet:
         raise NotImplementedError
 ```
 
@@ -126,7 +126,7 @@ class PoseModel:
     def get_skeleton(self) -> Sequence[Tuple[int, int]]:
         raise NotImplementedError
 
-    def __call__(self, index: Image) -> PoseSet:
+    def __call__(self, x: Image) -> PoseSet:
         raise NotImplementedError
 ```
 
@@ -138,7 +138,7 @@ class TextDetectionModel:
     def init(self):
         pass
 
-    def __call__(self, index: Image) -> TextDetectionSet:
+    def __call__(self, x: Image) -> TextDetectionSet:
         raise NotImplementedError
 ```
 

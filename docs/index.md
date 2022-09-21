@@ -90,7 +90,7 @@ a new interface for each one.
         def get_labels(self) -> Sequence[str]:
             raise NotImplementedError
         
-        def __call__(self, index: Image) -> DetectionSet:
+        def __call__(self, x: Image) -> DetectionSet:
             raise NotImplementedError
     ```
 
@@ -108,7 +108,7 @@ a new interface for each one.
         def get_skeleton(self) -> Sequence[Tuple[int, int]]:
             raise NotImplementedError
 
-        def __call__(self, index: Image) -> PoseSet:
+        def __call__(self, x: Image) -> PoseSet:
             raise NotImplementedError
     ```
 
@@ -120,7 +120,7 @@ a new interface for each one.
         def init(self):
             pass
             
-        def __call__(self, index: Image) -> TextDetectionSet:
+        def __call__(self, x: Image) -> TextDetectionSet:
             raise NotImplementedError
     ```
 
