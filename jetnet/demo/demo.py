@@ -47,7 +47,7 @@ class Demo(BaseModel):
     _sio = PrivateAttr()
     _sio_app = PrivateAttr()
     _app = PrivateAttr()
-    
+
     def run(self):
         self.model = self.model.build()
 
@@ -98,7 +98,6 @@ class Demo(BaseModel):
         re, image = camera.read()
         
         while self._running and re:
-            print(image.shape)
             image_jpeg = bytes(
                 cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 50])[1]
             )
