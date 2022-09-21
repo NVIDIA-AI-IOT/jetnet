@@ -25,7 +25,10 @@ a new interface for each one.
 
 ```python3
 class PoseModel:
-
+    
+    def init(self):
+        pass
+        
     def get_keypoints(self) -> Sequence[str]:
         raise NotImplementedError
 

@@ -69,6 +69,9 @@ a new interface for each one.
     ```python3
     class ClassificationModel:
 
+        def init(self):
+            pass
+
         def get_labels(self) -> Sequence[str]:
             raise NotImplementedError
         
@@ -81,6 +84,9 @@ a new interface for each one.
     ```python3
     class DetectionModel:
 
+        def init(self):
+            pass
+
         def get_labels(self) -> Sequence[str]:
             raise NotImplementedError
         
@@ -92,6 +98,9 @@ a new interface for each one.
 
     ```python3
     class PoseModel:
+
+        def init(self):
+            pass
 
         def get_keypoints(self) -> Sequence[str]:
             raise NotImplementedError
@@ -108,6 +117,9 @@ a new interface for each one.
     ```python3
     class TextDetectionModel:
 
+        def init(self):
+            pass
+            
         def __call__(self, index: Image) -> TextDetectionSet:
             raise NotImplementedError
     ```
