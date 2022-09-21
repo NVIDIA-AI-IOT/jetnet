@@ -1,7 +1,7 @@
 import os
 import time
 from typing import Tuple
-from .profile import ProfileResult, ProfileConfig, register_args, run_args
+from .profile import ProfileResult, Profile, register_args, run_args
 
 
 class DetectionProfileResult(ProfileResult):
@@ -24,7 +24,7 @@ def profile_detection(
     elapsed_time = 0.0
     for i in range(num_profile):
         image = dataset[i % dataset_size]
-        image_areas.append(image.pil().width * image.pil().height)
+        image_areas.append(image.width * image.height)
         time.sleep(sleep_interval)
         t0 = time.monotonic()
         output = model(image)
@@ -41,12 +41,12 @@ def profile_detection(
     return result
 
 
-class DetectionProfileConfig(ProfileConfig):
+class DetectionProfile(Profile):
 
     def build(self) -> DetectionProfileResult:
         return profile_detection(
-            self.model_config.build(),
-            self.dataset_config.build(),
+            self.model.build(),
+            self.dataset.build(),
             self.num_profile,
             self.num_warmup,
             self.sleep_interval

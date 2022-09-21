@@ -1,7 +1,7 @@
 import os
 import time
 from typing import Tuple
-from .profile import ProfileResult, ProfileConfig, register_args, run_args
+from .profile import ProfileResult, Profile, register_args, run_args
 
 
 class PoseProfileResult(ProfileResult):
@@ -10,11 +10,11 @@ class PoseProfileResult(ProfileResult):
     avg_num_keypoints: float
 
 
-class PoseProfileConfig(ProfileConfig):
+class PoseProfile(Profile):
 
     def build(self) -> PoseProfileResult:
-        model = self.model_config.build()
-        dataset = self.dataset_config.build()
+        model = self.model.build()
+        dataset = self.dataset.build()
 
         dataset_size = len(dataset)
         for i in range(self.num_warmup):
@@ -25,7 +25,7 @@ class PoseProfileConfig(ProfileConfig):
         elapsed_time = 0.0
         for i in range(self.num_profile):
             image = dataset[i % dataset_size]
-            image_areas.append(image.pil().width * image.pil().height)
+            image_areas.append(image.width * image.height)
             time.sleep(self.sleep_interval)
             t0 = time.monotonic()
             output = model(image)

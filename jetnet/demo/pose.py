@@ -3,7 +3,7 @@ from starlette.routing import Route
 from starlette.responses import JSONResponse
 from starlette.templating import Jinja2Templates
 
-from .demo import Demo, DemoConfig
+from .demo import Demo
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -27,9 +27,3 @@ class PoseDemo(Demo):
 
     def skeleton(self, request):
         return JSONResponse(self.model.get_skeleton())
-
-
-class PoseDemoConfig(DemoConfig):
-
-    def build(self) -> PoseDemo:
-        return PoseDemo(self)

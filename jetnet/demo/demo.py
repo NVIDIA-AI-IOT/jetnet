@@ -11,7 +11,6 @@ import socketio
 from typing import Union
 
 from pydantic import BaseModel, PrivateAttr
-from jetnet.config import Config
 from jetnet.utils import import_object
 from jetnet.image import Image
 
@@ -22,31 +21,36 @@ from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from jetnet.utils import import_object
-from jetnet.classification import ClassificationModelConfig
-from jetnet.detection import DetectionModelConfig
-from jetnet.text_detection import TextDetectionModelConfig
-from jetnet.pose import PoseModelConfig
+from jetnet.classification import ClassificationModel
+from jetnet.detection import DetectionModel
+from jetnet.text_detection import TextDetectionModel
+from jetnet.pose import PoseModel
+from pydantic import BaseModel, PrivateAttr
+from typing import Any
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 templates = Jinja2Templates(directory=os.path.join(dir_path, "templates"))
 
 
-class DemoConfig(Config):
+class Demo(BaseModel):
 
-    model_config: Config
+    model: Any
     host: str = "0.0.0.0"
     port: int = 8000
     camera_device: int = 0
     exclude_image: bool = False
 
+    _running = PrivateAttr(default=False)
+    _thread = PrivateAttr(default=None)
+    _camera = PrivateAttr()
+    _image_shape = PrivateAttr()
+    _sio = PrivateAttr()
+    _sio_app = PrivateAttr()
+    _app = PrivateAttr()
+    
+    def run(self):
+        self.model = self.model.build()
 
-class Demo(object):
-
-    def __init__(self, cfg: DemoConfig):
-        self._running = False
-        self._thread = None
-        self._model = cfg.model_config.build()
-        self._cfg = cfg
         self._camera = cv2.VideoCapture(self.camera_device)
         re, image = self._camera.read()
         if re:
@@ -55,7 +59,6 @@ class Demo(object):
             self._camera.release()
             raise RuntimeError("Could not read an image from the camera.")
 
-    def run(self):
         self._sio = socketio.AsyncServer(async_mode="asgi")
         self._sio_app = socketio.ASGIApp(self._sio)
         self._app = Starlette(
@@ -66,21 +69,6 @@ class Demo(object):
         )
         uvicorn.run(self._app, host=self.host, port=self.port)
 
-    @property
-    def host(self) -> str:
-        return self._cfg.host
-
-    @property
-    def port(self) -> int:
-        return self._cfg.port
-
-    @property
-    def camera_device(self) -> int:
-        return self._cfg.camera_device
-
-    @property
-    def exclude_image(self):
-        return self._cfg.exclude_image
 
     def get_image_shape(self, request):
         return JSONResponse(self._image_shape)
@@ -126,12 +114,9 @@ class Demo(object):
     def index(self, request):
         raise NotImplementedError
 
-    @property
-    def model(self):
-        return self._model
 
 def register_args(parser):
-    parser.add_argument('model_config', type=str)
+    parser.add_argument('model', type=str)
     parser.add_argument('--host', type=str, default="0.0.0.0")
     parser.add_argument('--port', type=int, default=8000)
     parser.add_argument('--camera_device', type=int, default=0)
@@ -139,23 +124,21 @@ def register_args(parser):
 
 
 def run_args(args):
-    from .classification import ClassificationDemoConfig
-    from .detection import DetectionDemoConfig
-    from .text_detection import TextDetectionDemoConfig
-    from .pose import PoseDemoConfig
+    from .classification import ClassificationDemo
+    from .detection import DetectionDemo
+    from .text_detection import TextDetectionDemo
+    from .pose import PoseDemo
 
-    model_config = import_object(args.model_config)
+    model = import_object(args.model)
     
-    if issubclass(model_config.__class__, ClassificationModelConfig):
-        demo_config = ClassificationDemoConfig(model_config=model_config, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    if issubclass(model_config.__class__, DetectionModelConfig):
-        demo_config = DetectionDemoConfig(model_config=model_config, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    if issubclass(model_config.__class__, TextDetectionModelConfig):
-        demo_config = TextDetectionDemoConfig(model_config=model_config, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    if issubclass(model_config.__class__, PoseModelConfig):
-        demo_config = PoseDemoConfig(model_config=model_config, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-
-    demo = demo_config.build()
+    if issubclass(model.__class__, ClassificationModel):
+        demo = ClassificationDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    if issubclass(model.__class__, DetectionModel):
+        demo = DetectionDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    if issubclass(model.__class__, TextDetectionModel):
+        demo = TextDetectionDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    if issubclass(model.__class__, PoseModel):
+        demo = PoseDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
 
     demo.run()
 

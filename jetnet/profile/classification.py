@@ -1,18 +1,18 @@
 import os
 import time
 from typing import Tuple
-from .profile import ProfileResult, ProfileConfig, register_args, run_args
+from .profile import ProfileResult, Profile, register_args, run_args
 
 
 class ClassificationProfileResult(ProfileResult):
     avg_image_area: float
 
 
-class ClassificationProfileConfig(ProfileConfig):
+class ClassificationProfile(Profile):
 
     def build(self) -> ClassificationProfileResult:
-        model = self.model_config.build()
-        dataset = self.dataset_config.build()
+        model = self.model.build()
+        dataset = self.dataset.build()
 
         dataset_size = len(dataset)
         for i in range(self.num_warmup):
@@ -21,7 +21,7 @@ class ClassificationProfileConfig(ProfileConfig):
         elapsed_time = 0.0
         for i in range(self.num_profile):
             image = dataset[i % dataset_size]
-            image_areas.append(image.pil().width * image.pil().height)
+            image_areas.append(image.width * image.height)
             time.sleep(self.sleep_interval)
             t0 = time.monotonic()
             model(image)

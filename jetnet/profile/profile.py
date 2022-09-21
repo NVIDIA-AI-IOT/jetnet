@@ -1,29 +1,29 @@
 import time
 import os
 from pydantic import BaseModel
-from jetnet.config import Config
 
 from jetnet.utils import import_object
 
-from jetnet.classification import ClassificationModelConfig
-from jetnet.text_detection import TextDetectionModelConfig
-from jetnet.detection import DetectionModelConfig
-from jetnet.pose import Pose, PoseModelConfig
+from jetnet.classification import ClassificationModel
+from jetnet.text_detection import TextDetectionModel
+from jetnet.detection import DetectionModel
+from jetnet.pose import Pose, PoseModel
+
 
 class ProfileResult(BaseModel):
     fps: float
 
 
-class ProfileConfig(Config):
-    model_config: Config # must be model
-    dataset_config: Config # must be dataset
+class Profile(BaseModel):
+    model: BaseModel # must be model
+    dataset: BaseModel # must be dataset
     num_warmup: int = 10
     num_profile: int = 50
     sleep_interval: float = 0.01
 
     def build(self) -> ProfileResult:
-        model = self.model_config.build()
-        dataset = self.dataset_config.build()
+        model = self.model.build()
+        dataset = self.dataset.build()
 
         dataset_size = len(dataset)
         for i in range(self.num_warmup):
@@ -43,45 +43,45 @@ class ProfileConfig(Config):
 
 
 def register_args(parser):
-    parser.add_argument('model_config', type=str)
-    parser.add_argument('dataset_config', type=str)
+    parser.add_argument('model', type=str)
+    parser.add_argument('dataset', type=str)
     parser.add_argument('--num_warmup', type=str, default=10)
     parser.add_argument('--num_profile', type=int, default=50)
     parser.add_argument('--sleep_interval', type=int, default=0.01)
 
 
 def run_args(args):
-    from jetnet.profile.profile import ProfileConfig
-    from jetnet.profile.classification import ClassificationProfileConfig
-    from jetnet.profile.detection import DetectionProfileConfig
-    from jetnet.profile.pose import PoseProfileConfig
-    from jetnet.profile.text_detection import TextDetectionProfileConfig
+    from jetnet.profile.profile import Profile
+    from jetnet.profile.classification import ClassificationProfile
+    from jetnet.profile.detection import DetectionProfile
+    from jetnet.profile.pose import PoseProfile
+    from jetnet.profile.text_detection import TextDetectionProfile
 
 
     
-    model_config = import_object(args.model_config)
-    dataset_config = import_object(args.dataset_config)
+    model = import_object(args.model)
+    dataset = import_object(args.dataset)
 
-    if issubclass(model_config.__class__, ClassificationModelConfig):
-        app_cls = ClassificationProfileConfig
-    elif issubclass(model_config.__class__, DetectionModelConfig):
-        app_cls = DetectionProfileConfig
-    elif issubclass(model_config.__class__, PoseModelConfig):
-        app_cls = PoseProfileConfig
-    elif issubclass(model_config.__class__, TextDetectionModelConfig):
-        app_cls = TextDetectionProfileConfig
+    if issubclass(model.__class__, ClassificationModel):
+        app_cls = ClassificationProfile
+    elif issubclass(model.__class__, DetectionModel):
+        app_cls = DetectionProfile
+    elif issubclass(model.__class__, PoseModel):
+        app_cls = PoseProfile
+    elif issubclass(model.__class__, TextDetectionModel):
+        app_cls = TextDetectionProfile
     else:
-        app_cls = ProfileConfig
-    print(app_cls)
-    config = app_cls(
-        model_config=model_config,
-        dataset_config=dataset_config,
+        app_cls = Profile
+    
+    profile = app_cls(
+        model=model,
+        dataset=dataset,
         num_warmup=args.num_warmup,
         num_profile=args.num_profile,
         sleep_interval=args.sleep_interval
     )
 
-    result = config.build()
+    result = profile.build()
 
     print(result.json(indent=2))
 

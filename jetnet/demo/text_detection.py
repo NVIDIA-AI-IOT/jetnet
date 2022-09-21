@@ -1,7 +1,7 @@
 import os
 from starlette.templating import Jinja2Templates
 
-from .demo import Demo, DemoConfig
+from .demo import Demo
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -12,10 +12,4 @@ class TextDetectionDemo(Demo):
 
     def index(self, request):
         return templates.TemplateResponse('text_detection.html.jinja', {'request': request, 'port': self.port})
-
-
-class TextDetectionDemoConfig(DemoConfig):
-
-    def build(self) -> TextDetectionDemo:
-        return TextDetectionDemo(self)
 
