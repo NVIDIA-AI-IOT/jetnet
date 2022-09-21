@@ -66,30 +66,28 @@ re-creating the model.
 
 For example, here's how we might define a new classification model
 
-=== "Definition (``cat_dog.py``)"
+```python
+from pydantic import PrivateAttr
 
-    ```python
-    from pydantic import PrivateAttr
+class CatDogModel(ClassificationModel):
+    
+    num_layers: int
 
-    class CatDogModel(ClassificationModel):
-        
-        num_layers: int
+    # private attributes can be non-JSON types, like a PyTorch module
+    _torch_module = PrivateAttr()
+    
+    def init(self):
+        # code to initialize model for execution
 
-        # private attributes can be non-JSON types, like a PyTorch module
-        _torch_module = PrivateAttr()
-        
-        def init(self):
-            # code to initialize model for execution
+    def get_labels(self) -> Sequence[str]:
+        return ["cat", "dog"]
 
-        def get_labels(self) -> Sequence[str]:
-            return ["cat", "dog"]
+    def __call__(self, x: Image) -> Classification:
+        # code to classify image
 
-        def __call__(self, x: Image) -> Classification:
-            # code to classify image
-
-    CATDOG_SMALL = CatDogModel(num_layers=10)
-    CATDOG_BIG = CatDogModel(num_layers=50)
-    ```
+CATDOG_SMALL = CatDogModel(num_layers=10)
+CATDOG_BIG = CatDogModel(num_layers=50)
+```
 
 We can then use the model with JetNet tools.
 
