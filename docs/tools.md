@@ -41,7 +41,7 @@ To use it, call ``jetnet build <model>``.  For example,
 as well as other task specific statistics like the average number of objects per image.  This
 is handy, especially for models that may have data-dependent runtime.
 
-To use it, call ``jetnet build <model> <dataset>``.  For example,
+To use it, call ``jetnet profile <model> <dataset>``.  For example,
 
 
 === "Classification"
