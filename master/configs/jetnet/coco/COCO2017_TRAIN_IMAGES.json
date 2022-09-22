@@ -1,0 +1,7 @@
+{
+  "path": "data/coco/train2017",
+  "recursive": false,
+  "zip_url": "http://images.cocodataset.org/zips/train2017.zip",
+  "zip_folder": "train2017",
+  "zip_file": "data/datasets/coco/train2017.zip"
+}
