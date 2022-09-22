@@ -92,7 +92,11 @@ POSE_CONFIGS = [
     "jetnet.trt_pose.DENSENET121_BODY_256X256", 
     "jetnet.trt_pose.DENSENET121_BODY_256X256_TRT", 
     "jetnet.trt_pose.DENSENET121_BODY_256X256_TRT_FP16", 
-    "jetnet.trt_pose.DENSENET121_BODY_256X256_TRT_INT8"
+    "jetnet.trt_pose.DENSENET121_BODY_256X256_TRT_INT8",
+    "jetnet.trt_pose.RESNET18_HAND_224X224", 
+    "jetnet.trt_pose.RESNET18_HAND_224X224_TRT", 
+    "jetnet.trt_pose.RESNET18_HAND_224X224_TRT_FP16", 
+    "jetnet.trt_pose.RESNET18_HAND_224X224_TRT_INT8",
 ]
 
 TEXT_DETECTION_CONFIGS = [
