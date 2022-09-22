@@ -7,7 +7,7 @@ theme:
   features:
     - content.tabs.link
     - content.code.annotate
-
+repo_url: https://github.com/NVIDIA-AI-IOT/jetnet
 markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
