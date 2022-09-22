@@ -1,3 +1,5 @@
+> What models or features are you interested in seeing in JetNet?  [Let us know](https://github.com/NVIDIA-AI-IOT/jetnet/discussions/5)!
+
 <img src="https://user-images.githubusercontent.com/4212806/191136464-8f3c05fc-9e70-4678-9402-6d4d8232661b.gif" style="max-height:160px;"/>
 <img src="https://user-images.githubusercontent.com/4212806/191136616-06ce3640-7e35-45a3-8b2e-7f7a5b9b7f28.gif" style="max-height:160px;"/>
 <img src="https://user-images.githubusercontent.com/4212806/191136450-4b2d55c1-c3c7-47d6-996e-11c62448747b.gif" style="max-height:160px;"/>
