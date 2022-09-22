@@ -19,7 +19,7 @@ def define_env(env):
         for config_str in config_strs:
             try:
                 config = import_object(config_str)
-                config_path = os.path.join('/configs/', '/'.join(config_str.split('.')) + '.json')
+                config_path = os.path.join('../configs/', '/'.join(config_str.split('.')) + '.json')
                 s += f"| {config.__class__.__name__} | {config_str} | [json]({config_path}) |\n"
             except:
                 print(f"could not import {config_str}")
