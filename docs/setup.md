@@ -14,6 +14,23 @@ cd jetnet
 
 Next, launch the docker container from inside the cloned directory
 
+=== "Jetson (JetPack 5.0.2)"
+
+    ```bash
+    docker run \
+        --network host \
+        --gpus all \
+        -it \
+        --rm \
+        --name=jetnet \
+        -v $(pwd):/jetnet \
+        --device /dev/video0 \
+        -v /tmp/.X11-unix:/tmp/.X11-unix \
+        -e DISPLAY=$DISPLAY \
+        jaybdub/jetnet:l4t-35.1.0 \
+        /bin/bash -c "cd /jetnet && python3 setup.py develop && /bin/bash"
+    ```
+
 === "Jetson (JetPack 5.0.1)"
 
     ```bash
