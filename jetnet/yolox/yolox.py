@@ -45,7 +45,7 @@ import tempfile
 import os
 
 import torch
-from torch2trt import torch2trt, TRTModule
+from torch2trt import torch2trt, TRTModule, trt
 from torch2trt.dataset import FolderDataset
 import PIL.Image
 import numpy as np
@@ -285,7 +285,9 @@ class YOLOXTRT(DetectionModel):
                 int8_mode=self.int8_mode,
                 max_workspace_size=self.max_workspace_size,
                 int8_calib_dataset=calib_folder,
-                int8_calib_algorithm=trt_calib_algo_from_str(self.int8_calib_algorithm)
+                int8_calib_algorithm=trt_calib_algo_from_str(self.int8_calib_algorithm),
+                use_onnx=True,
+                log_level=trt.Logger.VERBOSE
             )
 
             if self.engine_cache is not None:
