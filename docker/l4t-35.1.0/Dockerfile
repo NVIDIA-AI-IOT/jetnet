@@ -85,5 +85,10 @@ RUN pip install loguru tabulate
 # fix torchvision install
 RUN git clone https://github.com/pytorch/vision && cd vision && FORCE_CUDA=1 python3 setup.py install
 ENV LD_PRELOAD="$LD_PRELOAD /usr/local/lib/python3.8/dist-packages/skimage/_shared/../../scikit_image.libs/libgomp-d22c30c5.so.1.0.0"
-RUN pip install lmdb terminaltables lanms imgaug
+
+## MMOCR deps
+RUN pip install lmdb terminaltables lanms rapidfuzz
+RUN pip install imgaug --no-deps
 ENV LD_PRELOAD="$LD_PRELOAD /lib/aarch64-linux-gnu/libGLdispatch.so.0"
+
+RUN pip install mkdocs mkdocs-material mkdocs-macros-plugin
