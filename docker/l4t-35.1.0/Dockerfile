@@ -41,7 +41,7 @@ RUN pip install onnx
 # # MMLAB/PPL.CV
 # RUN apt-get install -y libspdlog-dev
 ENV MMLAB_DIR /mmlab
-# RUN mkdir -p ${MMLAB_DIR}
+RUN mkdir -p ${MMLAB_DIR}
 # RUN cd ${MMLAB_DIR} && git clone https://github.com/openppl-public/ppl.cv.git
 # ENV PPLCV_DIR /mmlab/ppl.cv
 # RUN cd ${PPLCV_DIR} && ./build.sh cuda
@@ -72,11 +72,18 @@ ENV MMLAB_DIR /mmlab
 # # MMLAB/MMDETECTION
 ENV MMDET_DIR ${MMLAB_DIR}/mmdetection
 RUN cd ${MMLAB_DIR} && git clone https://github.com/open-mmlab/mmdetection.git
-RUN cd $MMDET_DIR && pip install -r requirements/build.txt && pip install -v -e .
+RUN cd $MMDET_DIR && pip install -v -e . --no-deps
 
 ## MMLAB/MMOCR
 ENV MMOCR_DIR ${MMLAB_DIR}/mmocr
 RUN cd ${MMLAB_DIR} && git clone https://github.com/open-mmlab/mmocr.git
-RUN cd $MMOCR_DIR && pip install -r requirements/build.txt && pip install -v -e .
+RUN cd $MMOCR_DIR && pip install -v -e . --no-deps
 
-# RUN pip install progressbar
+# YOLOX deps
+RUN pip install loguru tabulate
+
+# fix torchvision install
+RUN git clone https://github.com/pytorch/vision && cd vision && FORCE_CUDA=1 python3 setup.py install
+ENV LD_PRELOAD="$LD_PRELOAD /usr/local/lib/python3.8/dist-packages/skimage/_shared/../../scikit_image.libs/libgomp-d22c30c5.so.1.0.0"
+RUN pip install lmdb terminaltables lanms imgaug
+ENV LD_PRELOAD="$LD_PRELOAD /lib/aarch64-linux-gnu/libGLdispatch.so.0"
