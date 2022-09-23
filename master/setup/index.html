@@ -448,7 +448,7 @@ If you have the disk space and there is an available container, this is a fast a
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span> jetnet
 </code></pre></div>
 <p>Next, launch the docker container from inside the cloned directory</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Jetson (JetPack 5.0.1)</label><label for="__tabbed_1_2">Desktop (NV driver 465.19.01+)</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Jetson (JetPack 5.0.2)</label><label for="__tabbed_1_2">Jetson (JetPack 5.0.1)</label><label for="__tabbed_1_3">Desktop (NV driver 465.19.01+)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker run <span class="se">\</span>
@@ -461,7 +461,7 @@ If you have the disk space and there is an available container, this is a fast a
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    --device /dev/video0 <span class="se">\</span>
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    -v /tmp/.X11-unix:/tmp/.X11-unix <span class="se">\</span>
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    -e <span class="nv">DISPLAY</span><span class="o">=</span><span class="nv">$DISPLAY</span> <span class="se">\</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    jaybdub/jetnet:l4t-34.1.1 <span class="se">\</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    jaybdub/jetnet:l4t-35.1.0 <span class="se">\</span>
 <a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    /bin/bash -c <span class="s2">&quot;cd /jetnet &amp;&amp; python3 setup.py develop &amp;&amp; /bin/bash&quot;</span>
 </code></pre></div>
 </div>
@@ -476,8 +476,23 @@ If you have the disk space and there is an available container, this is a fast a
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    --device /dev/video0 <span class="se">\</span>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    -v /tmp/.X11-unix:/tmp/.X11-unix <span class="se">\</span>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    -e <span class="nv">DISPLAY</span><span class="o">=</span><span class="nv">$DISPLAY</span> <span class="se">\</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    jaybdub/jetnet:x86-21.05 <span class="se">\</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    jaybdub/jetnet:l4t-34.1.1 <span class="se">\</span>
 <a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    /bin/bash -c <span class="s2">&quot;cd /jetnet &amp;&amp; python3 setup.py develop &amp;&amp; /bin/bash&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker run <span class="se">\</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    --network host <span class="se">\</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    --gpus all <span class="se">\</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    -it <span class="se">\</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    --rm <span class="se">\</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    --name<span class="o">=</span>jetnet <span class="se">\</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/jetnet <span class="se">\</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    --device /dev/video0 <span class="se">\</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    -v /tmp/.X11-unix:/tmp/.X11-unix <span class="se">\</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    -e <span class="nv">DISPLAY</span><span class="o">=</span><span class="nv">$DISPLAY</span> <span class="se">\</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    jaybdub/jetnet:x86-21.05 <span class="se">\</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    /bin/bash -c <span class="s2">&quot;cd /jetnet &amp;&amp; python3 setup.py develop &amp;&amp; /bin/bash&quot;</span>
 </code></pre></div>
 </div>
 </div>
@@ -497,7 +512,7 @@ a different base container. Below are the commands we use to build the pre-made 
 Check the GitHub repo docker files for more details.
 
 
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker build -t jaybdub/jetnet:l4t-34.1.1 -f <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/docker/l4t-34.1.1/Dockerfile <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/docker/l4t-34.1.1
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker build -t jaybdub/jetnet:l4t-34.1.1 -f <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/docker/l4t-34.1.1/Dockerfile <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/docker/l4t-34.1.1
 </code></pre></div>
 
 </details>
@@ -509,37 +524,37 @@ space, you can set up your system natively.</p>
 <li>Install TensorRT, PyTorch, OpenCV and Torchvision (please refer to external instructions)</li>
 <li>
 <p>Install miscellanerous dependencies</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pip3 install pydantic progressbar python3-socketio uvicorn starlette
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pip3 install pydantic progressbar python3-socketio uvicorn starlette
 </code></pre></div>
 </li>
 <li>
 <p>Install torch2trt</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pip3 install git+https://github.com/NVIDIA-AI-IOT/torch2trt.git@master
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>pip3 install git+https://github.com/NVIDIA-AI-IOT/torch2trt.git@master
 </code></pre></div>
 </li>
 <li>
 <p>Install YOLOX (required for <code>jetnet.yolox</code>)</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>git clone https://github.com/Megvii-BaseDetection/YOLOX
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">cd</span> YOLOX
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>python3 setup.py install
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="nb">cd</span> ..
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>git clone https://github.com/Megvii-BaseDetection/YOLOX
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">cd</span> YOLOX
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>python3 setup.py install
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="nb">cd</span> ..
 </code></pre></div>
 </li>
 <li>
 <p>Install EasyOCR (required for <code>jetnet.easyocr</code>)</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>pip3 install git+https://github.com/JaidedAI/EasyOCR.git@v1.5.0
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>pip3 install git+https://github.com/JaidedAI/EasyOCR.git@v1.5.0
 </code></pre></div>
 </li>
 <li>
 <p>Install TRTPose (required for <code>jetnet.trt_pose</code>)</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>pip3 install git+https://github.com/NVIDIA-AI-IOT/trt_pose.git
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>pip3 install git+https://github.com/NVIDIA-AI-IOT/trt_pose.git
 </code></pre></div>
 </li>
 <li>
 <p>Install JetNet</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>git clone https://github.com/NVIDIA-AI-IOT/jetnet
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nb">cd</span> jetnet
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>python3 setup.py develop
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>git clone https://github.com/NVIDIA-AI-IOT/jetnet
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nb">cd</span> jetnet
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>python3 setup.py develop
 </code></pre></div>
 </li>
 </ul>
