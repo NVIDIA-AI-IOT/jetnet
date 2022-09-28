@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from jetnet.mask import BinaryMask
+from jetnet.binary_mask import BinaryMask
 from jetnet.msgpack import to_msgpack, from_msgpack
 
 

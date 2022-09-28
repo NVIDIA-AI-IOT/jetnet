@@ -4,7 +4,7 @@ from jetnet.segmentation import Segmentation
 from jetnet.msgpack import to_msgpack, from_msgpack
 
 
-def test_binary_mask_msgpack():
+def test_segmentation_msgpack():
 
     a = Segmentation.from_numpy(np.array([
         [0, 0, 1, 1],
