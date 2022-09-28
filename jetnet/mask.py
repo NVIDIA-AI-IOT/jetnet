@@ -49,4 +49,4 @@ def mask_to_msgpack_dict(obj: BinaryMask):
 
 @register_msgpack_decoder("BinaryMask")
 def mask_from_msgpack_dict(msgpack_dict):
-    return BinaryMask(numpy_binary_mask_from_rle(msgpack_dict))
+    return BinaryMask.from_numpy(numpy_binary_mask_from_rle(msgpack_dict))
