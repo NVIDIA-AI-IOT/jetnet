@@ -2,15 +2,15 @@
 #include "rle.h"
 
 
-std::pair<std::list<long>, std::list<long>> rle_encode(uint8_t *data, size_t size) {
-    
+std::pair<std::list<size_t>, std::list<uint8_t>> rle_encode(uint8_t *data, size_t size) {
+
     uint8_t value = 0;
-    long count = 0;
+    size_t count = 0;
 
-    std::list<long> counts;
-    std::list<long> values;
+    std::list<size_t> counts;
+    std::list<uint8_t> values;
 
-    for (long i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         if (data[i] != value) {
             counts.push_back(count);
             values.push_back(value);
