@@ -7,6 +7,7 @@ ext_modules = [
     Pybind11Extension(
         "jetnet._jetnet_C",
         sorted(glob("src/*.cpp")),  # Sort source files for reproducibility
+        include_dirs=["src"]
     ),
 ]
 
