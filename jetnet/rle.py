@@ -4,7 +4,7 @@ import jetnet._jetnet_C
 
 def rle_encode(seg):
     rle = {'size': list(seg.shape)}
-    counts, values = jetnet._jetnet_C.rle(seg)
+    counts, values = jetnet._jetnet_C.rle_encode(seg)
     rle['counts'] = counts
     rle['values'] = values
     return rle
