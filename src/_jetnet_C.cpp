@@ -12,7 +12,10 @@ namespace py = pybind11;
 std::pair<std::list<long>, std::list<long>> py_rle_encode(py::array_t<uint8_t> x) {
     py::buffer_info buf = x.request();
     uint8_t *data = static_cast<uint8_t *>(buf.ptr);
-    return rle_encode(data, buf.size);
+    auto result = rle_encode(data, (size_t) buf.size);
+    std::list<long> counts(result.first.begin(), result.first.end());
+    std::list<long> values(result.second.begin(), result.second.end());
+    return {counts, values};
 }
 
 
