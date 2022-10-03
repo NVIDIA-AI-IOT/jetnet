@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <canvas id="display" width="640" height="480"></canvas>
+  <script>
+    var Module = {
+      onRuntimeInitialized: function() {
+        var canvas = document.getElementById("display");
+        var ctx = canvas.getContext("2d");
+        var data = Uint8ClampedArray.from(Module.make_red_rgba_array(307200, 0xFF0000FF).get());
+        console.log(data);
+        var imageData = new ImageData(
+          data,
+          640, 480
+        );
+        ctx.putImageData(imageData, 0, 0);
+        // var rle = Module.rle_encode("000110");
+        // for (var i = 0; i < rle.counts.size(); i++) {
+        //   console.log(rle.counts.get(i) + ", " + rle.values.get(i));
+        // }
+        // console.log('lerp result: ' + rle.counts.size());
+      }
+    };
+  </script>
+  <script src="jetnet_bindings.js"></script>
+</html>
