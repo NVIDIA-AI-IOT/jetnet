@@ -4,7 +4,7 @@ from jetnet.mmdet import (
     MASK_RCNN_R50_FPN_1X_COCO_TRT_FP16
 )
 from mmdet.apis import inference_detector
-
+from jetnet.image import read_image
 
 def test_pretrained_detector_build():
 
@@ -23,4 +23,8 @@ def test_mask_rcnn_r50():
 
     model = MASK_RCNN_R50_FPN_1X_COCO_TRT_FP16.build()
 
-    out = inference_detector(model.detector, "assets/dog.jpg")
+    image = read_image("assets/person.jpg")
+
+    output = model(image)
+
+    assert len(output.detections) > 0

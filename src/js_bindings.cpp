@@ -16,6 +16,7 @@ struct RLE {
     size_t size;
 };
 
+
 struct Color {
     uint8_t r;
     uint8_t g;
@@ -23,7 +24,8 @@ struct Color {
     uint8_t a;
 };
 
-struct RGBAData {
+
+struct ColorArray {
     std::unique_ptr<Color[]> _data;
     size_t _size;
     val get() {
@@ -31,7 +33,8 @@ struct RGBAData {
     }
 };
 
-RLE js_rle_encode(std::string x) {
+
+RLE rleEncode(std::string x) {
     auto result = rle_encode((uint8_t*) x.data(), (size_t) x.length());
     RLE rle({
         {result.first.begin(), result.first.end()},
@@ -43,10 +46,11 @@ RLE js_rle_encode(std::string x) {
 }
 
 
-RGBAData rle_to_rgba_data(RLE &rle, std::map<uint8_t, Color> colorMap) {
+void rleDecodeRGBA(RLE&rle, std::string rgba, std::map<uint8_t, Color))
+ColorArray rle_to_rgba_data(RLE &rle, std::map<uint8_t, Color> colorMap) {
 
     // create result data
-    RGBAData result = {
+    ColorArray result = {
         std::make_unique<Color[]>(rle.size),
         rle.size
     };
@@ -79,12 +83,6 @@ std::map<uint8_t, Color> make_binary_colormap() {
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
-    value_object<Color>("Color")
-        .field("r", &Color::r)
-        .field("g", &Color::g)
-        .field("b", &Color::b)
-        .field("a", &Color::a)
-        ;
 
     value_object<RLE>("RLE")
         .field("counts", &RLE::counts)
@@ -92,8 +90,16 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .field("size", &RLE::size)
         ;
 
-    class_<RGBAData>("RGBAData")
-        .function("get", &RGBAData::get);
+    value_object<Color>("Color")
+        .field("r", &Color::r)
+        .field("g", &Color::g)
+        .field("b", &Color::b)
+        .field("a", &Color::a)
+        ;
+
+    class_<ColorArray>("ColorArray")
+        .function("get", &ColorArray::get)
+        ;
 
     function("rle_encode", &js_rle_encode);
     function("rle_to_rgba_data", &rle_to_rgba_data);
