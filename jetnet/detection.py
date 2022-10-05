@@ -19,19 +19,28 @@ from jetnet.polygon import Polygon
 from jetnet.classification import Classification
 from jetnet.model import Model
 from jetnet.image import Image
+from jetnet.binary_mask import BinaryMask
 from pydantic import BaseModel
-
+from dataclasses import dataclass
 
 from typing import Optional, Sequence
 
 
 class Detection(BaseModel):
 
+    class Config:
+        arbitrary_types_allowed = True
+
     boundary: Polygon
     classification: Optional[Classification] = None
+    mask: Optional[BinaryMask] = None
 
 
 class DetectionSet(BaseModel):
+    
+    class Config:
+        arbitrary_types_allowed = True
+
     detections: Sequence[Detection]
 
 
