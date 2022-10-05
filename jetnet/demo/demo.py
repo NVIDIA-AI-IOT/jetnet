@@ -29,6 +29,7 @@ from typing import Union
 from pydantic import BaseModel, PrivateAttr
 from jetnet.utils import import_object
 from jetnet.image import Image
+from jetnet.msgpack import to_msgpack
 
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
@@ -46,6 +47,7 @@ from typing import Any
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 templates = Jinja2Templates(directory=os.path.join(dir_path, "templates"))
+static_files = StaticFiles(directory=os.path.join(dir_path, "static"))
 
 
 class Demo(BaseModel):
@@ -93,7 +95,8 @@ class Demo(BaseModel):
         routes = [
             Route('/', self.index),
             Mount("/ws", self._sio_app),
-            Route("/image_shape", self.get_image_shape)
+            Route("/image_shape", self.get_image_shape),
+            Mount('/static', static_files, name='static')
         ]
         return routes
 
@@ -119,18 +122,26 @@ class Demo(BaseModel):
             image = PIL.Image.fromarray(image)
             output = self.model(image)
 
-            full_mask = np.zeros(image_orig.shape[0:2], dtype=np.uint8)
-            for det in output.detections:
-                if hasattr(det, 'mask') and det.mask is not None:
-                    full_mask |= det.mask.numpy()
-            image_orig[full_mask == 0] = 0
+            # full_mask = np.zeros(image_orig.shape[0:2], dtype=np.uint8)
+            # for det in output.detections:
+            #     if hasattr(det, 'mask') and det.mask is not None:
+            #         full_mask |= det.mask.numpy()
+            # image_orig[full_mask == 0] = 0
                     # det.mask = None
-            image_jpeg = bytes(
-                cv2.imencode(".jpg", image_orig, [cv2.IMWRITE_JPEG_QUALITY, 50])[1]
-            )
+            # for det in output.detections:
+            #     det.mask = None
+
+            data = {
+                "output": output.dict()
+            }
+
             if not self.exclude_image:
-                loop.run_until_complete(self._sio.emit("image", image_jpeg))
-            # loop.run_until_complete(self._sio.emit("output", output.json()))
+                image_jpeg = bytes(
+                    cv2.imencode(".jpg", image_orig, [cv2.IMWRITE_JPEG_QUALITY, 50])[1]
+                )
+                data["image"] = image_jpeg
+
+            loop.run_until_complete(self._sio.emit("output", to_msgpack(data)))
 
             re, image = camera.read()
 

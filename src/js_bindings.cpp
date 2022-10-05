@@ -33,8 +33,11 @@ struct ColorArray {
     }
 };
 
+RLE make_rle() {
+    return RLE();
+}
 
-RLE rleEncode(std::string x) {
+RLE js_rle_encode(std::string x) {
     auto result = rle_encode((uint8_t*) x.data(), (size_t) x.length());
     RLE rle({
         {result.first.begin(), result.first.end()},
@@ -46,7 +49,6 @@ RLE rleEncode(std::string x) {
 }
 
 
-void rleDecodeRGBA(RLE&rle, std::string rgba, std::map<uint8_t, Color))
 ColorArray rle_to_rgba_data(RLE &rle, std::map<uint8_t, Color> colorMap) {
 
     // create result data
@@ -101,6 +103,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .function("get", &ColorArray::get)
         ;
 
+    function("make_rle", &make_rle);
     function("rle_encode", &js_rle_encode);
     function("rle_to_rgba_data", &rle_to_rgba_data);
     function("make_binary_colormap", &make_binary_colormap);
