@@ -22,6 +22,7 @@ import uvicorn
 import threading
 import PIL.Image
 import json
+import numpy as np
 import socketio
 from typing import Union
 
@@ -113,15 +114,23 @@ class Demo(BaseModel):
         re, image = camera.read()
         
         while self._running and re:
-            image_jpeg = bytes(
-                cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 50])[1]
-            )
+            image_orig = image
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             image = PIL.Image.fromarray(image)
             output = self.model(image)
+
+            full_mask = np.zeros(image_orig.shape[0:2], dtype=np.uint8)
+            for det in output.detections:
+                if hasattr(det, 'mask') and det.mask is not None:
+                    full_mask |= det.mask.numpy()
+            image_orig[full_mask == 0] = 0
+                    # det.mask = None
+            image_jpeg = bytes(
+                cv2.imencode(".jpg", image_orig, [cv2.IMWRITE_JPEG_QUALITY, 50])[1]
+            )
             if not self.exclude_image:
                 loop.run_until_complete(self._sio.emit("image", image_jpeg))
-            loop.run_until_complete(self._sio.emit("output", output.json()))
+            # loop.run_until_complete(self._sio.emit("output", output.json()))
 
             re, image = camera.read()
 
@@ -145,15 +154,16 @@ def run_args(args):
 
     model = import_object(args.model)
     
-    if issubclass(model.__class__, ClassificationModel):
-        demo = ClassificationDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    if issubclass(model.__class__, DetectionModel):
-        demo = DetectionDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    if issubclass(model.__class__, TextDetectionModel):
-        demo = TextDetectionDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    if issubclass(model.__class__, PoseModel):
-        demo = PoseDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    # if issubclass(model.__class__, ClassificationModel):
+    #     demo = ClassificationDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    # if issubclass(model.__class__, DetectionModel):
+    #     demo = DetectionDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    # if issubclass(model.__class__, TextDetectionModel):
+    #     demo = TextDetectionDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    # if issubclass(model.__class__, PoseModel):
+    #     demo = PoseDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
 
+    demo = DetectionDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
     demo.run()
 
 
