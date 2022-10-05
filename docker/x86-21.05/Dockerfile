@@ -26,10 +26,11 @@ RUN ./cmake-${CMAKE_VER}-linux-${ARCH}.sh --prefix=/usr --skip-license
 
 # MMLAB/MMCV
 RUN apt-get install -y libssl-dev
-RUN git clone --branch v1.6.1 https://github.com/open-mmlab/mmcv.git && cd mmcv && MMCV_WITH_OPS=1 python3 setup.py develop
+RUN git clone --branch v1.6.1 https://github.com/open-mmlab/mmcv.git && cd mmcv && MMCV_WITH_OPS=1 FORCE_CUDA=1 python3 setup.py develop
 RUN pip install onnx
 
-RUN apt-get install -y pkg-config libhdf5-103 libhdf5-dev
+RUN apt-get update
+RUN apt-get install -y libhdf5-dev libhdf5-103 pkg-config 
 RUN pip install versioned-hdf5
 
 # MMLAB/PPL.CV
