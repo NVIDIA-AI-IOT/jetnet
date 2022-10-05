@@ -1,6 +1,6 @@
 {% extends "base.html.jinja" %}
 {% block output %}
-    output = JSON.parse(data);
+    output = data_decoded["output"];
 
     overlayLayer.find("Text").forEach((x) => {x.destroy();});
     overlayLayer.find("Label").forEach((x) => {x.destroy();});
