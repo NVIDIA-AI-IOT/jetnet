@@ -181,6 +181,8 @@ def mmdet_mask_rcnn_inject_torch2trt_modules(det, modules):
     det.mask = modules['mask']
     return det
 
+def _trt_forward(module, x):
+    return module._trt(x)
 
 class _MMDet:
 
@@ -206,11 +208,13 @@ class _MMDet:
         if name == 'backbone':
             self.detector.backbone = value
         elif name == 'neck':
-            self.detector.neck == value
+            self.detector.neck = value
         elif name == 'bbox':
-            self.detector.roi_head.bbox_head = value
+            self.detector.roi_head.bbox_head._trt = value
+            self.detector.roi_head.bbox_head.forward = _trt_forward.__get__(self.detector.roi_head.bbox_head) # hack to allow original module methods
         elif name == 'mask':
-            self.detector.roi_head.mask_head = value
+            self.detector.roi_head.mask_head._trt = value
+            self.detector.roi_head.mask_head.forward = _trt_forward.__get__(self.detector.roi_head.mask_head)
         else:
             raise ValueError("Invalid module name")
 
@@ -233,14 +237,4 @@ class MMDet(Config[_MMDet]):
 
         return _MMDet(init_detector(config_path, weights_path))
 
-
-
-# class MMDetectionTorch2trtConfig(Config[torch.nn.Module]):
-
-#     detector: MMDetectionDetectorConfig
-#     fp16_mode: bool = False
-#     optimize_backbone: bool = True
-#     optimize_neck: bool = True
-#     optimize_bbox_head: bool = True
-#     optimize_mask_head: bool = True
 
