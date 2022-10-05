@@ -1,12 +1,14 @@
 
-from typing import Mapping, Sequence, Any, Literal
+from typing import Mapping, Sequence, Any, Literal, Optional
 from pydantic import BaseModel
 
+import os
 import torch
 
 from torch2trt import torch2trt, trt, TRTModule
 from torch2trt.flattener import Flattener
 
+from jetnet.utils import make_parent_dir
 
 Torch2trtCalibAlgo = Literal["legacy", "entropy", "entropy_2", "minmax"]
 Torch2trtLogLevel = Literal["verbose", "error", "info", "warning"]
@@ -54,6 +56,7 @@ class Torch2trtEngineConfig(BaseModel):
     use_onnx: bool = False
     onnx_opset: int = 11
     log_level: Torch2trtLogLevel = "error"
+    engine_cache: Optional[str] = None
 
     def get_input_flattener(self):
         return Flattener.from_value(self.inputs, condition=lambda x: isinstance(x, Torch2trtInputSpec))
@@ -92,6 +95,16 @@ class Torch2trtModel(BaseModel):
 
         trt_modules = {}
         for name, config in self.engine_configs.items():
+            if config.engine_cache is not None:
+                engine_cache = os.path.expandvars(config.engine_cache)
+                if os.path.exists(engine_cache):
+                    module_trt = TRTModule()
+                    module_trt.load_state_dict(torch.load(engine_cache))
+                    trt_modules[name] = module_trt
+
+        for name, config in self.engine_configs.items():
+            if name in trt_modules:
+                continue # skip cached
             module = model.get_module(name)
             inputs = config.build_input_tensors()
             module_trt = torch2trt(
@@ -106,6 +119,9 @@ class Torch2trtModel(BaseModel):
                 opt_shapes=config.get_opt_shapes()
             )
             trt_modules[name] = module_trt
+            if config.engine_cache is not None:
+                make_parent_dir(config.engine_cache)
+                torch.save(module_trt.state_dict(), config.engine_cache)
         
         for name, module_trt in trt_modules.items():
             model.set_module(name, module_trt)
