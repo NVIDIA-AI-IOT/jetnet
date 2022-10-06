@@ -17,6 +17,7 @@ from jetnet.utils import make_parent_dir, download
 from jetnet.pose import PoseModel, PoseSet, Keypoint, Pose
 from jetnet.image import Image, ImageDataset
 from jetnet.tensorrt import trt_calib_algo_from_str, Int8CalibAlgo
+from jetnet.config import Config
 
 from typing import Literal, Optional, Sequence, Tuple, Literal, Callable
 from pydantic import PrivateAttr
@@ -38,48 +39,26 @@ from trt_pose.models import MODELS
 
 
 
-class TRTPose(PoseModel):
+class _TRTPose(PoseModel):
 
-    model: Literal[
-        "resnet18_baseline_att",
-        "densenet121_baseline_att"
-    ]
-    keypoints: Sequence[str]
-    skeleton: Sequence[Tuple[int, int]]
-    input_size: Tuple[int, int]
-    weights_url: Optional[str] = None
-    weights_path: Optional[str] = None
-    device: Literal["cpu", "cuda"] = "cuda"
-
-    _module = PrivateAttr()
-    _device = PrivateAttr()
-    _topology = PrivateAttr()
-    _parse_objects = PrivateAttr()
-    _normalize = PrivateAttr()
-    
-    def init(self):
-
-        module = MODELS[self.model](len(self.keypoints), 2 * len(self.skeleton))
-
-        if self.weights_path is not None:
-            if not os.path.exists(self.weights_path):
-                make_parent_dir(self.weights_path)
-                download(self.weights_url, self.weights_path)
-            module.load_state_dict(torch.load(self.weights_path))
-
-        self._device = torch.device(self.device)
-        self._module = module.to(self._device).eval()
-
-        coco_skeleton = [[a+1, b+1] for a, b in self.skeleton]
-        
-        self._topology = coco_category_to_topology(
-            {"keypoints": self.keypoints, "skeleton": coco_skeleton}
-        )
-        self._parse_objects = ParseObjects(self._topology)
-        self._normalize = Normalize(
-            [255.0 * 0.485, 255.0 * 0.456, 255.0 * 0.406],
-            [255.0 * 0.229, 255.0 * 0.224, 255.0 * 0.225],
-        ).to(self._device)
+    def __init__(self,
+            module,
+            device,
+            topology,
+            parse_objects,
+            normalize,
+            input_size,
+            skeleton,
+            keypoints
+        ):
+        self._module = module
+        self._device = device
+        self._topology = topology
+        self._parse_objects = parse_objects
+        self._normalize = normalize
+        self.input_size = input_size
+        self.skeleton = skeleton
+        self.keypoints = keypoints
 
     def get_keypoints(self) -> Sequence[str]:
         return self.keypoints
@@ -136,27 +115,66 @@ class TRTPose(PoseModel):
             return PoseSet.construct(poses=poses)
 
 
-class TRTPoseTRT(PoseModel):
+class TRTPose(Config[_TRTPose]):
+
+    model: Literal[
+        "resnet18_baseline_att",
+        "densenet121_baseline_att"
+    ]
+    keypoints: Sequence[str]
+    skeleton: Sequence[Tuple[int, int]]
+    input_size: Tuple[int, int]
+    weights_url: Optional[str] = None
+    weights_path: Optional[str] = None
+    device: Literal["cpu", "cuda"] = "cuda"
+
+    def build(self):
+
+        module = MODELS[self.model](len(self.keypoints), 2 * len(self.skeleton))
+
+        if self.weights_path is not None:
+            if not os.path.exists(self.weights_path):
+                make_parent_dir(self.weights_path)
+                download(self.weights_url, self.weights_path)
+            module.load_state_dict(torch.load(self.weights_path))
+
+        device = torch.device(self.device)
+        module = module.to(device).eval()
+
+        coco_skeleton = [[a+1, b+1] for a, b in self.skeleton]
+        
+        topology = coco_category_to_topology(
+            {"keypoints": self.keypoints, "skeleton": coco_skeleton}
+        )
+        parse_objects = ParseObjects(topology)
+        normalize = Normalize(
+            [255.0 * 0.485, 255.0 * 0.456, 255.0 * 0.406],
+            [255.0 * 0.229, 255.0 * 0.224, 255.0 * 0.225],
+        ).to(device)
+
+        return _TRTPose(module, device, topology, parse_objects, normalize, self.input_size, self.skeleton, self.keypoints)
+
+
+class TRTPoseTRT(Config[_TRTPose]):
 
     model: TRTPose
     int8_mode: bool = False
     fp16_mode: bool = False
     max_workspace_size: int = 1 << 25
     engine_cache: Optional[str] = None
-    int8_calib_dataset: Optional[ImageDataset] = None
+    int8_calib_dataset: Optional[Config[ImageDataset]] = None
     int8_calib_cache: Optional[str] = None
     int8_num_calib: int = 1
     int8_calib_algorithm: Int8CalibAlgo = "entropy_2"
 
-    def init(self):
+    def build(self):
         model = self.model.build()
 
         if self.engine_cache is not None and os.path.exists(self.engine_cache):
             module = TRTModule()
             module.load_state_dict(torch.load(self.engine_cache))
             model._module = module
-            self.model = model
-            return self
+            return model
         
         if self.int8_mode:
             
@@ -204,15 +222,4 @@ class TRTPoseTRT(PoseModel):
 
         model._module = module_trt
 
-        self.model = model
-        return self
-    
-    def get_keypoints(self) -> Sequence[str]:
-        return self.model.get_keypoints()
-
-    def get_skeleton(self) -> Sequence[Tuple[int, int]]:
-        return self.model.get_skeleton()
-
-    def __call__(self, x: Image) -> PoseSet:
-        return self.model(x)
-
+        return model

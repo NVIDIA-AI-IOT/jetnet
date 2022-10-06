@@ -111,7 +111,7 @@ class TorchvisionModelTRT(Config[_TorchvisionModel]):
     fp16_mode: bool = False
     max_workspace_size: int = 1 << 25
     engine_cache: Optional[str] = None
-    int8_calib_dataset: Optional[ImageDataset] = None
+    int8_calib_dataset: Optional[Config[ImageDataset]] = None
     int8_calib_cache: Optional[str] = None
     int8_num_calib: int = 1
     int8_calib_algorithm: Int8CalibAlgo = "entropy_2"
