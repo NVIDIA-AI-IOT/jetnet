@@ -6,7 +6,8 @@ from jetnet.all_configs import (
     CLASSIFICATION_CONFIGS,
     DETECTION_CONFIGS,
     TEXT_DETECTION_CONFIGS,
-    POSE_CONFIGS
+    POSE_CONFIGS,
+    INSTANCE_SEGMENTATION_CONFIGS
 )
 
 
@@ -37,6 +38,10 @@ def define_env(env):
     @env.macro
     def render_detection_configs():
         return render_configs(DETECTION_CONFIGS)
+
+    @env.macro
+    def render_instance_segmentation_configs():
+        return render_configs(INSTANCE_SEGMENTATION_CONFIGS)
 
     @env.macro
     def render_text_detection_configs():
