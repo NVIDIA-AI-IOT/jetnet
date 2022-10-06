@@ -30,15 +30,11 @@ class ProfileResult(BaseModel):
 
 
 class Profile(BaseModel):
-    model: BaseModel # must be model
-    dataset: BaseModel # must be dataset
     num_warmup: int = 10
     num_profile: int = 50
     sleep_interval: float = 0.01
 
-    def build(self) -> ProfileResult:
-        model = self.model.build()
-        dataset = self.dataset.build()
+    def run(self, model, dataset) -> ProfileResult:
 
         dataset_size = len(dataset)
         for i in range(self.num_warmup):
@@ -76,6 +72,8 @@ def run_args(args):
     
     model = import_object(args.model)
     dataset = import_object(args.dataset)
+    model = model.build()
+    dataset = dataset.build()
 
     if issubclass(model.__class__, ClassificationModel):
         app_cls = ClassificationProfile
@@ -89,14 +87,12 @@ def run_args(args):
         app_cls = Profile
     
     profile = app_cls(
-        model=model,
-        dataset=dataset,
         num_warmup=args.num_warmup,
         num_profile=args.num_profile,
         sleep_interval=args.sleep_interval
     )
 
-    result = profile.build()
+    result = profile.run(model, dataset)
 
     print(result.json(indent=2))
 

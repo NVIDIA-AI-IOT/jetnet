@@ -25,9 +25,7 @@ class ClassificationProfileResult(ProfileResult):
 
 class ClassificationProfile(Profile):
 
-    def build(self) -> ClassificationProfileResult:
-        model = self.model.build()
-        dataset = self.dataset.build()
+    def run(self, model, dataset) -> ClassificationProfileResult:
 
         dataset_size = len(dataset)
         for i in range(self.num_warmup):

@@ -27,9 +27,7 @@ class TextDetectionProfileResult(ProfileResult):
 
 class TextDetectionProfile(Profile):
 
-    def build(self) -> TextDetectionProfileResult:
-        model = self.model.build()
-        dataset = self.dataset.build()
+    def run(self, model, dataset) -> TextDetectionProfileResult:
 
         dataset_size = len(dataset)
         for i in range(self.num_warmup):
