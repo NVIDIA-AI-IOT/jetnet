@@ -52,12 +52,12 @@ static_files = StaticFiles(directory=os.path.join(dir_path, "static"))
 
 class Demo(BaseModel):
 
-    model: Any
     host: str = "0.0.0.0"
     port: int = 8000
     camera_device: int = 0
     exclude_image: bool = False
 
+    _model = PrivateAttr()
     _running = PrivateAttr(default=False)
     _thread = PrivateAttr(default=None)
     _camera = PrivateAttr()
@@ -66,8 +66,8 @@ class Demo(BaseModel):
     _sio_app = PrivateAttr()
     _app = PrivateAttr()
 
-    def run(self):
-        self.model = self.model.build()
+    def run(self, model):
+        self._model = model
 
         self._camera = cv2.VideoCapture(self.camera_device)
         re, image = self._camera.read()
@@ -87,6 +87,9 @@ class Demo(BaseModel):
         )
         uvicorn.run(self._app, host=self.host, port=self.port)
 
+    @property
+    def model(self):
+        return self._model
 
     def get_image_shape(self, request):
         return JSONResponse(self._image_shape)
@@ -163,19 +166,19 @@ def run_args(args):
     from .text_detection import TextDetectionDemo
     from .pose import PoseDemo
 
-    model = import_object(args.model)
-    
-    # if issubclass(model.__class__, ClassificationModel):
-    #     demo = ClassificationDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    # if issubclass(model.__class__, DetectionModel):
-    #     demo = DetectionDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    # if issubclass(model.__class__, TextDetectionModel):
-    #     demo = TextDetectionDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    # if issubclass(model.__class__, PoseModel):
-    #     demo = PoseDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    model_cfg = import_object(args.model)
+    model = model_cfg.build()
 
-    demo = DetectionDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    demo.run()
+    if issubclass(model.__class__, ClassificationModel):
+        demo = ClassificationDemo(host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    if issubclass(model.__class__, DetectionModel):
+        demo = DetectionDemo(host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    if issubclass(model.__class__, TextDetectionModel):
+        demo = TextDetectionDemo(host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    if issubclass(model.__class__, PoseModel):
+        demo = PoseDemo(host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+
+    demo.run(model)
 
 
 def main():
