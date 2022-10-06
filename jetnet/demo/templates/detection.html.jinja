@@ -14,7 +14,8 @@
         var p = output.detections[i];
 
         
-        if ("mask" in p) {
+        if ("mask" in p && (p["mask"])) {
+            
             var rle_p = Module.make_rle();
             p["mask"].counts.forEach((x) => {rle_p.counts.push_back(x)});
             p["mask"].values.forEach((x) => {rle_p.values.push_back(x)});
