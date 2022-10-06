@@ -22,4 +22,13 @@ std::pair<std::list<long>, std::list<long>> py_rle_encode(py::array_t<uint8_t> x
 PYBIND11_MODULE(_jetnet_C, m) {
     m.doc() = "JetNet C extensions"; // optional module docstring
     m.def("rle_encode", &py_rle_encode, "Run length encode numpy array");
+    m.def("make_rle", []{ return RLE(); });
+    m.def("binary_rle_or", &binary_rle_or);
+    m.def("pick_or", &pick_or);
+    m.def("dec_count", &dec_count);
+
+    py::class_<RLE>(m, "RLE")
+        .def_readwrite("counts", &RLE::counts)
+        .def_readwrite("values", &RLE::values)
+        .def_readwrite("size", &RLE::size);
 }

@@ -9,7 +9,7 @@
     </head>
     <body>
 
-        <canvas id="display" width="640" height="480"></canvas>
+        <canvas hidden id="display" width="640" height="480"></canvas>
         <div id="container"/>
         </div>
         <script>
@@ -39,6 +39,7 @@
                 stage.add(overlayLayer);
 
                 var imageObj = new Image();
+                var canvas = document.getElementById("display");
 
                 var konvaImage = new Konva.Image({
                     x: 0,
@@ -48,7 +49,17 @@
                     image: imageObj
                 });
 
+                var overlayImage = new Konva.Image({
+                    x: 0,
+                    y: 0,
+                    width: image_shape.width,
+                    height: image_shape.height,
+                    image: canvas,
+                    opacity: 0.5
+                });
+                var colorArray = Module.make_color_array(image_shape.width*image_shape.height);
                 imageLayer.add(konvaImage);
+                overlayLayer.add(overlayImage);
                 
                 imageObj.onload = function() {
                     konvaImage.getLayer().draw();
