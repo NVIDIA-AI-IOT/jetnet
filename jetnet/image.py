@@ -39,6 +39,8 @@ def read_image(path: str):
 class ImageDataset(Dataset[Image]):
     pass
 
+class ImageDatasetConfig(Config[ImageDataset]):
+    pass
 
 class _ImageFolder(ImageDataset):
 
@@ -58,12 +60,12 @@ class _ImageFolder(ImageDataset):
         return read_image(self._image_paths[index])
 
 
-class ImageFolder(Config[_ImageFolder]):
+class ImageFolder(ImageDatasetConfig):
 
     path: str
     recursive: bool = False
 
-    def build(self):
+    def build(self) -> ImageDataset:
         return _ImageFolder(self.path, self.recursive)
 
 
@@ -73,7 +75,7 @@ class RemoteImageFolder(ImageFolder):
     zip_folder: str
     zip_file: str
 
-    def build(self):
+    def build(self) -> ImageDataset:
 
         zip_url = self.zip_url
         zip_file = self.zip_file

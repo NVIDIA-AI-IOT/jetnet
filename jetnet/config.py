@@ -24,6 +24,6 @@ T = TypeVar("T")
 
 
 class Config(GenericModel, Generic[T]):
-
+    
     def build(self) -> T:
         raise NotImplementedError

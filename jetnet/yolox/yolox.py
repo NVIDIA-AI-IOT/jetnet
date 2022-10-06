@@ -55,7 +55,7 @@ from typing import Optional
 
 from jetnet.utils import make_parent_dir
 from jetnet.dataset import Dataset
-from jetnet.image import Image
+from jetnet.image import Image, ImageDatasetConfig
 from jetnet.config import Config
 from jetnet.detection import DetectionModel
 from jetnet.tensorrt import Int8CalibAlgo, trt_calib_algo_from_str
@@ -256,7 +256,7 @@ class YOLOXTRT(Config[_YOLOX]):
     fp16_mode: bool = False
     max_workspace_size: int = 1 << 25
     engine_cache: Optional[str] = None
-    int8_calib_dataset: Optional[Config[ImageDataset]] = None
+    int8_calib_dataset: Optional[ImageDatasetConfig] = None
     int8_calib_cache: Optional[str] = None
     int8_num_calib: int = 512
     int8_calib_algorithm: Int8CalibAlgo = "entropy_2"
