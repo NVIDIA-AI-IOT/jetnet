@@ -49,7 +49,6 @@ from torch2trt import torch2trt, TRTModule
 from torch2trt.dataset import FolderDataset
 import PIL.Image
 import numpy as np
-from pydantic import PrivateAttr
 from progressbar import Timer, ETA, Bar, ProgressBar
 
 from typing import Optional
@@ -57,6 +56,7 @@ from typing import Optional
 from jetnet.utils import make_parent_dir
 from jetnet.dataset import Dataset
 from jetnet.image import Image
+from jetnet.config import Config
 from jetnet.detection import DetectionModel
 from jetnet.tensorrt import Int8CalibAlgo, trt_calib_algo_from_str
 
@@ -91,7 +91,76 @@ class PilToTensor(object):
         return tensor
 
 
-class YOLOX(DetectionModel):
+class _YOLOX(DetectionModel):
+    def __init__(self,
+            module,
+            device,
+            decoder,
+            pad_resize,
+            to_tensor,
+            labels,
+            conf_thresh,
+            nms_thresh,
+            input_size
+        ):
+        self._module = module
+        self._device = device
+        self._decoder = decoder
+        self._pad_resize = pad_resize
+        self._to_tensor = to_tensor
+        self.labels = labels
+        self.conf_thresh = conf_thresh
+        self.nms_thresh = nms_thresh
+        self.input_size = input_size
+
+    def get_labels(self) -> Sequence[str]:
+        return self.labels
+
+
+    def __call__(self, x: Image) -> DetectionSet:
+        with torch.no_grad():
+            image = x
+            width, height = image.width, image.height
+            scale = 1.0 / min(self.input_size[1] / height, self.input_size[0] / width)
+            data = self._to_tensor(image)
+            data = self._pad_resize(data).to(self._device).float()[None, ...]
+            outputs = self._module(data)
+            if self._decoder is not None:
+                outputs = self._decoder(outputs, dtype=outputs.type())
+            outputs = postprocess(
+                outputs, len(self.labels), self.conf_thresh, self.nms_thresh, class_agnostic=True
+            )
+
+            objects_tensor = outputs[0]
+
+            if objects_tensor is None:
+                return DetectionSet.construct(detections=[])
+
+            num_objects = objects_tensor.size(0)
+            objs = []
+            for i in range(num_objects):
+                o = objects_tensor[i].cpu()
+                os = o[0:4] * scale
+                obj = Detection.construct(
+                    boundary=Polygon.construct(
+                        points=[
+                            Point.construct(x=int(os[0]), y=int(os[1])),
+                            Point.construct(x=int(os[2]), y=int(os[1])),
+                            Point.construct(x=int(os[2]), y=int(os[3])),
+                            Point.construct(x=int(os[0]), y=int(os[3])),
+                        ]
+                    ),
+                    classification=Classification.construct(
+                        index=int(o[6]),
+                        label=self.labels[int(o[6])],
+                        score=float(o[4] * o[5]),
+                    )
+                )
+                objs.append(obj)
+            return DetectionSet.construct(detections=objs)
+
+
+class YOLOX(Config[_YOLOX]):
 
     exp: Literal["yolox_l", "yolox_m", "yolox_nano", "yolox_s", "yolox_tiny", "yolox_x"]
     input_size: Tuple[int, int]
@@ -101,13 +170,6 @@ class YOLOX(DetectionModel):
     device: Literal["cpu", "cuda"] = "cuda"
     weights_path: Optional[str] = None
     weights_url: Optional[str] = None
-
-    _module = PrivateAttr()
-    _device = PrivateAttr()
-    _decoder = PrivateAttr()
-    _pad_resize = PrivateAttr()
-    _to_tensor = PrivateAttr()
-
 
     def _get_weights_url(self):
         if self.exp == "yolox_l":
@@ -153,7 +215,7 @@ class YOLOX(DetectionModel):
         else:
             raise KeyError("Experiment not found.")
 
-    def init(self):
+    def build(self):
 
         device = torch.device(self.device)
 
@@ -174,71 +236,32 @@ class YOLOX(DetectionModel):
 
         module = module.to(device).eval()
 
-        self._pad_resize = PadResize(self.input_size[::-1])
-        self._to_tensor = PilToTensor()
-        self._module = module
-        self._device = device
-        self._decoder = None
-
-    def get_labels(self) -> Sequence[str]:
-        return self.labels
-
-    def __call__(self, x: Image) -> Sequence[Detection]:
-        with torch.no_grad():
-            image = x
-            width, height = image.width, image.height
-            scale = 1.0 / min(self.input_size[1] / height, self.input_size[0] / width)
-            data = self._to_tensor(image)
-            data = self._pad_resize(data).to(self._device).float()[None, ...]
-            outputs = self._module(data)
-            if self._decoder is not None:
-                outputs = self._decoder(outputs, dtype=outputs.type())
-            outputs = postprocess(
-                outputs, len(self.labels), self.conf_thresh, self.nms_thresh, class_agnostic=True
-            )
-
-            objects_tensor = outputs[0]
-
-            if objects_tensor is None:
-                return DetectionSet.construct(detections=[])
-
-            num_objects = objects_tensor.size(0)
-            objs = []
-            for i in range(num_objects):
-                o = objects_tensor[i].cpu()
-                os = o[0:4] * scale
-                obj = Detection.construct(
-                    boundary=Polygon.construct(
-                        points=[
-                            Point.construct(x=int(os[0]), y=int(os[1])),
-                            Point.construct(x=int(os[2]), y=int(os[1])),
-                            Point.construct(x=int(os[2]), y=int(os[3])),
-                            Point.construct(x=int(os[0]), y=int(os[3])),
-                        ]
-                    ),
-                    classification=Classification.construct(
-                        index=int(o[6]),
-                        label=self.labels[int(o[6])],
-                        score=float(o[4] * o[5]),
-                    )
-                )
-                objs.append(obj)
-            return DetectionSet.construct(detections=objs)
+        return _YOLOX(
+            module, 
+            device, 
+            None, 
+            PadResize(self.input_size[::-1]), 
+            PilToTensor(),
+            self.labels,
+            self.conf_thresh,
+            self.nms_thresh,
+            self.input_size
+        )
 
 
-class YOLOXTRT(DetectionModel):
+class YOLOXTRT(Config[_YOLOX]):
 
     model: YOLOX
     int8_mode: bool = False
     fp16_mode: bool = False
     max_workspace_size: int = 1 << 25
     engine_cache: Optional[str] = None
-    int8_calib_dataset: Optional[ImageDataset] = None
+    int8_calib_dataset: Optional[Config[ImageDataset]] = None
     int8_calib_cache: Optional[str] = None
     int8_num_calib: int = 512
     int8_calib_algorithm: Int8CalibAlgo = "entropy_2"
 
-    def init(self):
+    def build(self):
 
         model = self.model.build()
         model._module.head.decode_in_inference = False
@@ -299,12 +322,4 @@ class YOLOXTRT(DetectionModel):
         model(dummy_image)
         model._module = module_trt
 
-        self.model = model
-        return self
-
-    def __call__(self, x: Image) -> DetectionSet:
-        return self.model(x)
-    
-    def get_labels(self):
-        return self.model.get_labels()
-        
+        return model

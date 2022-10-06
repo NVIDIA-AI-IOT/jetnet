@@ -16,7 +16,6 @@
 from abc import abstractmethod
 
 from typing import TypeVar, Generic
-from pydantic.generics import GenericModel
 
 T = TypeVar("T")
 
@@ -24,16 +23,8 @@ T = TypeVar("T")
 __all__ = ["Dataset"]
 
 
-class Dataset(GenericModel, Generic[T]):
+class Dataset(Generic[T]):
     
-    def init(self):
-        pass
-
-    def build(self):
-        clone = self.copy(deep=True)
-        clone.init()
-        return clone
-        
     @abstractmethod
     def __len__(self) -> int:
         raise NotImplementedError
