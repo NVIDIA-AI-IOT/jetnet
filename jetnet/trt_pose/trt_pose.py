@@ -15,7 +15,7 @@
 
 from jetnet.utils import make_parent_dir, download
 from jetnet.pose import PoseModel, PoseSet, Keypoint, Pose
-from jetnet.image import Image, ImageDataset
+from jetnet.image import Image, ImageDataset, ImageDatasetConfig
 from jetnet.tensorrt import trt_calib_algo_from_str, Int8CalibAlgo
 from jetnet.config import Config
 
@@ -162,7 +162,7 @@ class TRTPoseTRT(Config[_TRTPose]):
     fp16_mode: bool = False
     max_workspace_size: int = 1 << 25
     engine_cache: Optional[str] = None
-    int8_calib_dataset: Optional[Config[ImageDataset]] = None
+    int8_calib_dataset: Optional[ImageDatasetConfig] = None
     int8_calib_cache: Optional[str] = None
     int8_num_calib: int = 1
     int8_calib_algorithm: Int8CalibAlgo = "entropy_2"

@@ -24,7 +24,7 @@ import torch
 
 from mmocr.utils.ocr import MMOCR as MMOCR_original
 
-from jetnet.image import Image
+from jetnet.image import Image, ImageDatasetConfig
 from jetnet.text_detection import (
     TextDetection,
     TextDetectionModel,
@@ -172,9 +172,9 @@ class MMOCR(Config[_MMOCR]):
         return _MMOCR(_mmocr)
 
 
-class MMOCRTRT(TextDetectionModel):
+class MMOCRTRT(Config[_MMOCR]):
     model: MMOCR
-    int8_calib_dataset: Optional[Config[ImageDataset]] = None
+    int8_calib_dataset: Optional[ImageDatasetConfig] = None
     detector_config: Optional[Torch2trtConfig] = None
     recognizer_config: Optional[Torch2trtConfig] = None
     
