@@ -7,25 +7,26 @@
     
     overlayLayer.find("Line").forEach((line) => {line.destroy();});
     overlayLayer.find("Text").forEach((text) => {text.destroy();});
+
+    var rle = null;
+
     for (let i = 0; i < output.detections.length; i++) {
         var p = output.detections[i];
+
+        
         if ("mask" in p) {
-            var rle = Module.make_rle();
-            p["mask"].counts.forEach((x) => {rle.counts.push_back(x)});
-            p["mask"].values.forEach((x) => {rle.values.push_back(x)});
+            var rle_p = Module.make_rle();
+            p["mask"].counts.forEach((x) => {rle_p.counts.push_back(x)});
+            p["mask"].values.forEach((x) => {rle_p.values.push_back(x)});
             var size = p["mask"]["size"];
-            rle.size = size[0] * size[1];
-            var colormap = Module.make_binary_colormap();
-            var rgba_data = Module.rle_to_rgba_data(rle, colormap).get();
-            rgba_data = Uint8ClampedArray.from(rgba_data);
-            var imageData = new ImageData(
-                rgba_data,
-                size[1], size[0]
-            );
-            var canvas = document.getElementById("display");
-            var ctx = canvas.getContext("2d");
-            ctx.putImageData(imageData, 0, 0);
+            rle_p.size = size[0] * size[1];
+            if (!rle) {
+                rle = rle_p;
+            } else {
+                rle = Module.binary_rle_or(rle, rle_p);
+            }
         }
+
         var pts = p.boundary.points;
         var points = [];
         for (let j = 0; j < pts.length; j++) {
@@ -35,7 +36,7 @@
             points: points,
             closed: true,
             fill: '#76b900',
-            opacity: 0.25
+            opacity: 0.1
         })
         var outline = new Konva.Line({
             points: points,
@@ -57,5 +58,27 @@
         overlayLayer.add(outline);
         overlayLayer.add(text);
     }
+    var imageData = null;
+    if (rle) {
+        var colormap = Module.make_binary_colormap();
+        Module.fill_rgba_binary_rle(colorArray, rle, 
+            Module.make_color(0, 0, 0, 0),
+            Module.make_color(118, 185, 0, 255)
+        );
+        var rgba_data2 = Uint8ClampedArray.from(colorArray.get());
+        imageData = new ImageData(
+            rgba_data2,
+            size[1], size[0]
+        );
+    } else {
+        imageData = new ImageData(
+            image_shape.width, image_shape.height
+        );
+    }
+    var canvas = document.getElementById("display");
+    var ctx = canvas.getContext("2d");
+    ctx.putImageData(imageData, 0, 0);
+
     overlayLayer.draw();
+    
 {% endblock %}
