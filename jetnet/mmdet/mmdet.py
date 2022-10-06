@@ -5,7 +5,7 @@ import os
 from mmdet.apis import init_detector, inference_detector
 from jetnet.utils import download, make_parent_dir
 from jetnet.config import Config
-from jetnet.detection import Detection, DetectionSet
+from jetnet.detection import Detection, DetectionSet, DetectionModel
 from jetnet.binary_mask import BinaryMask
 from jetnet.polygon import Polygon
 from jetnet.point import Point
@@ -22,7 +22,7 @@ import mmcv
 def _trt_forward(module, x):
     return module._trt(x)
 
-class _MMDet:
+class _MMDet(DetectionModel):
 
     def __init__(self, detector, labels):
         self.detector = detector
