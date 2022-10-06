@@ -17,10 +17,10 @@
 from abc import ABC, abstractmethod
 
 from typing import Optional
-from pydantic import PrivateAttr
 
 from jetnet.dataset import Dataset
 from jetnet.utils import parent_dir, unzip, download
+from jetnet.config import Config
 
 import base64
 import io
@@ -40,13 +40,11 @@ class ImageDataset(Dataset[Image]):
     pass
 
 
-class ImageFolder(ImageDataset):
-    path: str
-    recursive: bool = False
+class _ImageFolder(ImageDataset):
 
-    _image_paths = PrivateAttr()
-    
-    def init(self):
+    def __init__(self, path, recursive: bool = False):
+        self.path = path
+        self.recursive = recursive
         prefix = "**" if self.recursive else "*"
         image_paths = glob.glob(os.path.join(self.path, f"{prefix}.jpg"))
         image_paths += glob.glob(os.path.join(self.path, f"{prefix}.png"))
@@ -60,13 +58,22 @@ class ImageFolder(ImageDataset):
         return read_image(self._image_paths[index])
 
 
+class ImageFolder(Config[_ImageFolder]):
+
+    path: str
+    recursive: bool = False
+
+    def build(self):
+        return _ImageFolder(self.path, self.recursive)
+
+
 class RemoteImageFolder(ImageFolder):
 
     zip_url: str
     zip_folder: str
     zip_file: str
 
-    def init(self):
+    def build(self):
 
         zip_url = self.zip_url
         zip_file = self.zip_file
@@ -96,4 +103,4 @@ class RemoteImageFolder(ImageFolder):
 
             shutil.move(os.path.join(tmp, zip_folder), path)
 
-        super().init()
+        return super().build()
