@@ -188,7 +188,7 @@ class EasyOCRTRT(Config[_EasyOCR]):
 
         return module_trt
 
-    def init(self):
+    def build(self):
         model = self.model.build()
 
         if self.detector_config is not None:
