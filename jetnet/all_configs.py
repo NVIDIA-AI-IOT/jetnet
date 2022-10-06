@@ -81,7 +81,16 @@ DETECTION_CONFIGS = [
     "jetnet.yolox.YOLOX_NANO", 
     "jetnet.yolox.YOLOX_NANO_TRT", 
     "jetnet.yolox.YOLOX_NANO_TRT_FP16", 
-    "jetnet.yolox.YOLOX_NANO_TRT_INT8"
+    "jetnet.yolox.YOLOX_NANO_TRT_INT8",
+    "jetnet.mmdet.MASK_RCNN_R50_FPN_1X_COCO",
+    "jetnet.mmdet.MASK_RCNN_R50_FPN_1X_COCO_TRT_FP16",
+    "jetnet.mmdet.MASK_RCNN_R50_FPN_1X_COCO_TRT"
+]
+
+INSTANCE_SEGMENTATION_CONFIGS = [
+    "jetnet.mmdet.MASK_RCNN_R50_FPN_1X_COCO",
+    "jetnet.mmdet.MASK_RCNN_R50_FPN_1X_COCO_TRT_FP16",
+    "jetnet.mmdet.MASK_RCNN_R50_FPN_1X_COCO_TRT"
 ]
 
 POSE_CONFIGS = [
@@ -125,6 +134,7 @@ IMAGE_DATASET_CONFIGS = [
 ALL_CONFIGS = \
     CLASSIFICATION_CONFIGS + \
     DETECTION_CONFIGS + \
+    INSTANCE_SEGMENTATION_CONFIGS + \
     POSE_CONFIGS + \
     TEXT_DETECTION_CONFIGS + \
     IMAGE_DATASET_CONFIGS
