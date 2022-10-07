@@ -17,6 +17,6 @@ setup(
     description="Easy to use neural networks for NVIDIA Jetson (and desktop too!)",
     packages=find_packages(),
     entry_points={"console_scripts": ["jetnet = jetnet.__main__:main"]},
-    install_requires=["pydantic"],
+    install_requires=["pydantic", "pybind11", "msgpack"],
     ext_modules=ext_modules
 )

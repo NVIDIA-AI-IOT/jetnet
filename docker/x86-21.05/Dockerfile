@@ -77,3 +77,4 @@ RUN cd $MMOCR_DIR && pip install -r requirements/build.txt && pip install -v -e 
 RUN pip install progressbar
 
 RUN pip install mkdocs mkdocs-material mkdocs-macros-plugin
+RUN pip install pybind11 msgpack
