@@ -203,44 +203,6 @@ print(model.json(indent=2))
 
 </details>
 
-### Define a custom model class
-
-You can create your own model by subclassing the related base model for the task. For example,
-
-```python
-from pydantic import PrivateAttr
-
-class CatDogModel(ClassificationModel):
-    
-    num_layers: int
-
-    # private attributes can be non-JSON types, like a PyTorch module
-    _torch_module = PrivateAttr()
-    
-    def init(self):
-        # code to initialize model for execution
-
-    def get_labels(self) -> Sequence[str]:
-        return ["cat", "dog"]
-
-    def __call__(self, x: Image) -> Classification:
-        # code to classify image
-```
-
-You can then define some instances of your model
-
-```python3
-CAT_DOG_SMALL = CatDogModel(num_layers=10)
-CAT_DOG_BIG = CatDogModel(num_layers=50)
-```
-
-If the model can be imported in Python, it can be used
-with the command line tools.  Suppose we have our models defined in ``./cat_dog.py``,
-we could use a model like this
-
-```python3
-jetnet demo cat_dog.CAT_DOG_SMALL
-```
 
 ## Dataset usage
 
@@ -269,45 +231,4 @@ To read a sample from the dataset, do this
 
 ```python3
 image = dataset[0]
-```
-
-### Use your own images
-
-If you have images in a folder, you can create a dataset
-for them like this
-
-```python3
-CAT_DOG_IMAGES = ImageFolder(path="images")
-```
-
-Assuming this is defined in ``./cat_dog.py`` you could then
-use it with the command line tools like this
-
-```python3
-jetnet profile cat_dog.CAT_DOG_SMALL cat_dog.CAT_DOG_IMAGES
-```
-
-> It's worth checking out the RemoteImageFolder, so
-> you can store your images remotely, and automatically
-> download it.  This will make your dataset more reproducible.
-
-
-### Define a custom dataset class
-
-If the pre-made dataset classes don't fit your use case, you
-can create your own dataset class like this
-
-```python3
-from jetnet.image import ImageDataset
-
-class CatDogImages(ImageDataset):
-
-    def init(self):
-        # code to prepare dataset for reading, ie: downloading data
-
-    def __len__(self) -> int:
-        # code to get length of dataset
-
-    def __getitem__(self) -> Image:
-        # code to read sample from dataset
 ```
