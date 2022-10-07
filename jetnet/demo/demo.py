@@ -70,6 +70,8 @@ class Demo(BaseModel):
         self._model = model
 
         self._camera = cv2.VideoCapture(self.camera_device)
+        self._camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self._camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         re, image = self._camera.read()
         if re:
             self._image_shape = {"width": int(image.shape[1]), "height": int(image.shape[0])}
