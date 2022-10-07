@@ -24,7 +24,7 @@ import torch
 
 from mmocr.utils.ocr import MMOCR as MMOCR_original
 
-from jetnet.image import Image
+from jetnet.image import Image, ImageDatasetConfig
 from jetnet.text_detection import (
     TextDetection,
     TextDetectionModel,
@@ -53,6 +53,7 @@ from jetnet.text_detection import TextDetectionModel, TextDetectionSet
 from jetnet.utils import make_parent_dir
 from jetnet.tensorrt import trt_calib_algo_from_str, Int8CalibAlgo, trt_log_level_from_str, TrtLogLevel
 from jetnet.tensorrt import Torch2trtConfig
+from jetnet.config import Config
 
 
 class _MMOCR_wrapper(MMOCR_original):
@@ -91,7 +92,42 @@ class _MMOCR_wrapper(MMOCR_original):
             )
         return det_recog_result
 
-class MMOCR(TextDetectionModel):
+class _MMOCR(TextDetectionModel):
+
+    def __init__(self, mmocr):
+        self._mmocr = mmocr
+        
+    @torch.no_grad()
+    def __call__(self, x: Image) -> TextDetectionSet:
+
+        image = x
+        data = np.array(image)
+
+        # RGB -> BGR
+        if image.mode == "RGB":
+            data = cv2.cvtColor(data, cv2.COLOR_RGB2BGR)
+
+        raw_output = self._mmocr.readtext_raw(data)
+        detections = []
+
+        for raw_value in raw_output[0]["result"]:
+            box = raw_value["box"]
+            detection = TextDetection.construct(
+                boundary=Polygon.construct(
+                    points=[
+                        Point.construct(x=int(box[2 * i]), y=int(box[2 * i + 1]))
+                        for i in range(len(box) // 2)
+                    ]
+                ),
+                text=raw_value["text"],
+                score=float(raw_value["box_score"] * raw_value["text_score"]),
+            )
+            detections.append(detection)
+
+        return TextDetectionSet.construct(detections=detections)
+
+
+class MMOCR(Config[_MMOCR]):
 
 
     detector: Literal[
@@ -127,48 +163,18 @@ class MMOCR(TextDetectionModel):
         "MASTER",
     ]
 
-    _mmocr = PrivateAttr()
-
-    def init(self) -> TextDetectionModel:
-        self._mmocr = _MMOCR_wrapper(
+    def build(self):
+        _mmocr = _MMOCR_wrapper(
             det=self.detector,
             recog=self.recognizer,
             config_dir=os.path.join(os.environ["MMOCR_DIR"], "configs")
         )
-
-    @torch.no_grad()
-    def __call__(self, x: Image) -> TextDetectionSet:
-
-        image = x
-        data = np.array(image)
-
-        # RGB -> BGR
-        if image.mode == "RGB":
-            data = cv2.cvtColor(data, cv2.COLOR_RGB2BGR)
-
-        raw_output = self._mmocr.readtext_raw(data)
-        detections = []
-
-        for raw_value in raw_output[0]["result"]:
-            box = raw_value["box"]
-            detection = TextDetection.construct(
-                boundary=Polygon.construct(
-                    points=[
-                        Point.construct(x=int(box[2 * i]), y=int(box[2 * i + 1]))
-                        for i in range(len(box) // 2)
-                    ]
-                ),
-                text=raw_value["text"],
-                score=float(raw_value["box_score"] * raw_value["text_score"]),
-            )
-            detections.append(detection)
-
-        return TextDetectionSet.construct(detections=detections)
+        return _MMOCR(_mmocr)
 
 
-class MMOCRTRT(TextDetectionModel):
+class MMOCRTRT(Config[_MMOCR]):
     model: MMOCR
-    int8_calib_dataset: Optional[ImageDataset] = None
+    int8_calib_dataset: Optional[ImageDatasetConfig] = None
     detector_config: Optional[Torch2trtConfig] = None
     recognizer_config: Optional[Torch2trtConfig] = None
     
@@ -231,7 +237,7 @@ class MMOCRTRT(TextDetectionModel):
 
         return module_trt
 
-    def init(self):
+    def build(self):
         model = self.model.build()
 
         if self.detector_config is not None:
@@ -247,9 +253,4 @@ class MMOCRTRT(TextDetectionModel):
         if self.recognizer_config is not None:
             model._mmocr.recog_model.backbone = rec_trt
 
-        self.model = model
-
-        return self
-
-    def __call__(self, x: Image) -> TextDetectionSet:
-        return self.model(x)
+        return model

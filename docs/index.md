@@ -5,6 +5,8 @@
 <img src="https://user-images.githubusercontent.com/4212806/191136450-4b2d55c1-c3c7-47d6-996e-11c62448747b.gif" style="max-height:160px;"/>
 <img src="https://user-images.githubusercontent.com/4212806/191137124-7dae37a3-a659-4e3e-8373-9a1c44b57e48.gif" style="max-height:160px;"/>
 <img src="https://user-images.githubusercontent.com/4212806/191136896-e42ab4d9-3a2f-4553-a1c7-49c59fc7e7a2.gif" style="max-height:160px;"/>
+<img src="https://user-images.githubusercontent.com/4212806/194674515-a4a18168-935f-42e1-9c2e-917c43b9d7a4.gif"
+style="max-height:160px;"/>
 
 JetNet is a collection of [models](models.md), [datasets](datasets.md), and
 [tools](tools.md) that make it easy to explore neural networks on NVIDIA Jetson (and desktop too!). It can easily be used and extended with [Python](python/usage.md).  
@@ -60,6 +62,16 @@ For example, here is how you would run a live web demo for different tasks
 
     <img src="https://user-images.githubusercontent.com/4212806/191136896-e42ab4d9-3a2f-4553-a1c7-49c59fc7e7a2.gif">
 
+=== "Instance Segmentation"
+
+    ```bash
+    jetnet demo jetnet.mmdet.MASK_RCNN_R50_FPN_1X_COCO_TRT_FP16
+    ```
+    
+    and then open your browser to ``<ip_address>:8000`` to view the detections:
+
+    <img src="https://user-images.githubusercontent.com/4212806/194674515-a4a18168-935f-42e1-9c2e-917c43b9d7a4.gif">
+
 
 ### It's implementation agnostic
 
@@ -70,9 +82,6 @@ a new interface for each one.
 
     ```python3
     class ClassificationModel:
-
-        def init(self):
-            pass
 
         def get_labels(self) -> Sequence[str]:
             raise NotImplementedError
@@ -86,9 +95,6 @@ a new interface for each one.
     ```python3
     class DetectionModel:
 
-        def init(self):
-            pass
-
         def get_labels(self) -> Sequence[str]:
             raise NotImplementedError
         
@@ -100,9 +106,6 @@ a new interface for each one.
 
     ```python3
     class PoseModel:
-
-        def init(self):
-            pass
 
         def get_keypoints(self) -> Sequence[str]:
             raise NotImplementedError
@@ -118,9 +121,6 @@ a new interface for each one.
 
     ```python3
     class TextDetectionModel:
-
-        def init(self):
-            pass
             
         def __call__(self, x: Image) -> TextDetectionSet:
             raise NotImplementedError
@@ -164,6 +164,14 @@ For example, the following models, which include TensorRT optimization can be re
     model = EASYOCR_EN_TRT_FP16.build()
     ```
 
+=== "Instance Segmentation"
+
+    ```python
+    from jetnet.mmdet import MASK_RCNN_R50_FPN_1X_COCO_TRT_FP16
+
+    model = MASK_RCNN_R50_FPN_1X_COCO_TRT_FP16.build()
+    ```
+
 ### It's easy to set up
 
 <!-- <div style="display: inline-block"> -->
@@ -173,54 +181,6 @@ For example, the following models, which include TensorRT optimization can be re
 JetNet comes with pre-built docker containers for Jetson and Desktop.
 In case these don't work for you, manual setup instructions are provided.
 Check out the <a href="setup">Setup</a> page for details.
-
-<!-- </div> -->
-
-
-<!-- </div> -->
-
-### It's extensible
-
-<!-- <div style="display: inline-block"> -->
-
-<!-- <img src="assets/dog.jpg" style="max-width:256px;" align="left"> -->
-
-JetNet is written with <a href="python/usage">Python</a> so that it is easy
-to extend.  If you want to use the JetNet tools with a different model, or are
-considering contributing to the project to help other developers easily use your model, all you need to do is implement one of the JetNet [interfaces](python/reference/#abstract-types).
-
-For example, here's how we might define a new classification model
-
-=== "Definition (``cat_dog.py``)"
-
-    ```python
-    from pydantic import PrivateAttr
-
-    class CatDogModel(ClassificationModel):
-        
-        num_layers: int
-
-        # private attributes can be non-JSON types, like a PyTorch module
-        _torch_module = PrivateAttr()
-        
-        def init(self):
-            # code to initialize model for execution
-
-        def get_labels(self) -> Sequence[str]:
-            return ["cat", "dog"]
-
-        def __call__(self, x: Image) -> Classification:
-            # code to classify image
-
-    CATDOG_SMALL = CatDogModel(num_layers=10)
-    CATDOG_BIG = CatDogModel(num_layers=50)
-    ```
-
-We can then use the model with JetNet tools.
-
-```bash
-jetnet demo cat_dog.CATDOG_SMALL
-```
 
 ## Get Started!
 

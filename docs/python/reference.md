@@ -29,7 +29,8 @@ class Classification:
 ```python3
 class Detection:
     boundary: Polygon
-    classification: Classification
+    classification: Optional[Classification]
+    mask: Optional[BinaryMask]
 ```
 
 ### DetectionSet
@@ -87,9 +88,6 @@ class TextDetectionSet:
 ```python3
 class ClassificationModel:
 
-    def init(self):
-        pass
-
     def get_labels(self) -> Sequence[str]:
         raise NotImplementedError
       
@@ -102,9 +100,6 @@ class ClassificationModel:
 ```python3
 class DetectionModel:
 
-    def init(self):
-        pass
-
     def get_labels(self) -> Sequence[str]:
         raise NotImplementedError
       
@@ -116,9 +111,6 @@ class DetectionModel:
 
 ```python3
 class PoseModel:
-
-    def init(self):
-        pass
 
     def get_keypoints(self) -> Sequence[str]:
         raise NotImplementedError
@@ -135,9 +127,6 @@ class PoseModel:
 ```python3
 class TextDetectionModel:
 
-    def init(self):
-        pass
-
     def __call__(self, x: Image) -> TextDetectionSet:
         raise NotImplementedError
 ```
@@ -147,9 +136,6 @@ class TextDetectionModel:
 ```python3
 class ImageDataset:
 
-    def init(self):
-        pass
-        
     def __len__(self) -> int:
         raise NotImplementedError
 

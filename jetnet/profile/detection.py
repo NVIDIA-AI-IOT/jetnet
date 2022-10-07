@@ -58,10 +58,10 @@ def profile_detection(
 
 class DetectionProfile(Profile):
 
-    def build(self) -> DetectionProfileResult:
+    def run(self, model, dataset) -> DetectionProfileResult:
         return profile_detection(
-            self.model.build(),
-            self.dataset.build(),
+            model,
+            dataset,
             self.num_profile,
             self.num_warmup,
             self.sleep_interval

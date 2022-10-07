@@ -2,69 +2,89 @@
     <head>
         <script src="https://cdn.socket.io/4.5.0/socket.io.min.js" integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k" crossorigin="anonymous"></script>
         <script src="https://unpkg.com/konva@8/konva.min.js"></script>
+        <script crossorigin src="https://unpkg.com/@msgpack/msgpack"></script>
         <script>
             var socket = io(":{{port}}", {path: "/ws/socket.io"});
         </script>
     </head>
     <body>
+
+        <canvas hidden id="display" width="640" height="480"></canvas>
         <div id="container"/>
         </div>
         <script>
 
-            fetch('/image_shape')
-                .then((response) => response.json())
-                .then((image_shape) => {
-                    //image_shape = image_shape;//JSON.parse(data);
-                    console.log(image_shape);
-            {% block setup %}{% endblock %}
-            
-            var width = window.innerWidth;
-            var height = window.innerHeight;
+        var Module = {
+            onRuntimeInitialized: function() {
+                fetch('/image_shape')
+                    .then((response) => response.json())
+                    .then((image_shape) => {
+                        //image_shape = image_shape;//JSON.parse(data);
+                        console.log(image_shape);
+                {% block setup %}{% endblock %}
+                
+                var width = window.innerWidth;
+                var height = window.innerHeight;
 
-            var stage = new Konva.Stage({
-                container: 'container',
-                width: width,
-                height: height,
-            });
+                var stage = new Konva.Stage({
+                    container: 'container',
+                    width: width,
+                    height: height,
+                });
 
-            var imageLayer = new Konva.Layer();
-            stage.add(imageLayer);
+                var imageLayer = new Konva.Layer();
+                stage.add(imageLayer);
 
-            var overlayLayer = new Konva.Layer();
-            stage.add(overlayLayer);
+                var overlayLayer = new Konva.Layer();
+                stage.add(overlayLayer);
 
-            var imageObj = new Image();
+                var imageObj = new Image();
+                var canvas = document.getElementById("display");
 
-            var konvaImage = new Konva.Image({
-                x: 0,
-                y: 0,
-                width: image_shape.width,
-                height: image_shape.height,
-                image: imageObj
-            });
+                var konvaImage = new Konva.Image({
+                    x: 0,
+                    y: 0,
+                    width: image_shape.width,
+                    height: image_shape.height,
+                    image: imageObj
+                });
 
-            imageLayer.add(konvaImage);
-            
-            imageObj.onload = function() {
-                konvaImage.getLayer().draw();
+                var overlayImage = new Konva.Image({
+                    x: 0,
+                    y: 0,
+                    width: image_shape.width,
+                    height: image_shape.height,
+                    image: canvas,
+                    opacity: 0.5
+                });
+                var colorArray = Module.make_color_array(image_shape.width*image_shape.height);
+                imageLayer.add(konvaImage);
+                overlayLayer.add(overlayImage);
+                
+                imageObj.onload = function() {
+                    konvaImage.getLayer().draw();
+                }
+                
+                function jpegToBase64(buffer){
+                    var base64 = btoa(new Uint8Array(buffer).reduce(function (data, byte) {
+                        return data + String.fromCharCode(byte);
+                    }, ''));
+                    return "data:image/jpeg;base64," + base64;
+                }
+                
+
+                socket.on("output", (data) => {
+                    data_decoded = MessagePack.decode(data);
+                    if ("image" in data_decoded) {
+                        imageObj.src = jpegToBase64(data_decoded["image"]);
+                    }
+                    {% block output %}{% endblock %}
+                });
+
+                });
             }
-            
-            function jpegToBase64(buffer){
-                var base64 = btoa(new Uint8Array(buffer).reduce(function (data, byte) {
-                    return data + String.fromCharCode(byte);
-                }, ''));
-                return "data:image/jpeg;base64," + base64;
-            }
-            
-            socket.on("image", (data) => {
-                imageObj.src = jpegToBase64(data);
-            });
-
-            socket.on("output", (data) => {
-                {% block output %}{% endblock %}
-            });
-
-            });
+        };
         </script>
+        <script src="{{ url_for('static', path='/jetnet_bindings.js') }}"></script>
     </body>
 </html>

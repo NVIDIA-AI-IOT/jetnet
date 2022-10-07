@@ -22,12 +22,14 @@ import uvicorn
 import threading
 import PIL.Image
 import json
+import numpy as np
 import socketio
 from typing import Union
 
 from pydantic import BaseModel, PrivateAttr
 from jetnet.utils import import_object
 from jetnet.image import Image
+from jetnet.msgpack import to_msgpack
 
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
@@ -45,16 +47,17 @@ from typing import Any
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 templates = Jinja2Templates(directory=os.path.join(dir_path, "templates"))
+static_files = StaticFiles(directory=os.path.join(dir_path, "static"))
 
 
 class Demo(BaseModel):
 
-    model: Any
     host: str = "0.0.0.0"
     port: int = 8000
     camera_device: int = 0
     exclude_image: bool = False
 
+    _model = PrivateAttr()
     _running = PrivateAttr(default=False)
     _thread = PrivateAttr(default=None)
     _camera = PrivateAttr()
@@ -63,10 +66,12 @@ class Demo(BaseModel):
     _sio_app = PrivateAttr()
     _app = PrivateAttr()
 
-    def run(self):
-        self.model = self.model.build()
+    def run(self, model):
+        self._model = model
 
         self._camera = cv2.VideoCapture(self.camera_device)
+        self._camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self._camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         re, image = self._camera.read()
         if re:
             self._image_shape = {"width": int(image.shape[1]), "height": int(image.shape[0])}
@@ -84,6 +89,9 @@ class Demo(BaseModel):
         )
         uvicorn.run(self._app, host=self.host, port=self.port)
 
+    @property
+    def model(self):
+        return self._model
 
     def get_image_shape(self, request):
         return JSONResponse(self._image_shape)
@@ -92,7 +100,8 @@ class Demo(BaseModel):
         routes = [
             Route('/', self.index),
             Mount("/ws", self._sio_app),
-            Route("/image_shape", self.get_image_shape)
+            Route("/image_shape", self.get_image_shape),
+            Mount('/static', static_files, name='static')
         ]
         return routes
 
@@ -113,15 +122,31 @@ class Demo(BaseModel):
         re, image = camera.read()
         
         while self._running and re:
-            image_jpeg = bytes(
-                cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 50])[1]
-            )
+            image_orig = image
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             image = PIL.Image.fromarray(image)
             output = self.model(image)
+
+            # full_mask = np.zeros(image_orig.shape[0:2], dtype=np.uint8)
+            # for det in output.detections:
+            #     if hasattr(det, 'mask') and det.mask is not None:
+            #         full_mask |= det.mask.numpy()
+            # image_orig[full_mask == 0] = 0
+                    # det.mask = None
+            # for det in output.detections:
+            #     det.mask = None
+
+            data = {
+                "output": output.dict()
+            }
+
             if not self.exclude_image:
-                loop.run_until_complete(self._sio.emit("image", image_jpeg))
-            loop.run_until_complete(self._sio.emit("output", output.json()))
+                image_jpeg = bytes(
+                    cv2.imencode(".jpg", image_orig, [cv2.IMWRITE_JPEG_QUALITY, 50])[1]
+                )
+                data["image"] = image_jpeg
+
+            loop.run_until_complete(self._sio.emit("output", to_msgpack(data)))
 
             re, image = camera.read()
 
@@ -143,18 +168,19 @@ def run_args(args):
     from .text_detection import TextDetectionDemo
     from .pose import PoseDemo
 
-    model = import_object(args.model)
-    
-    if issubclass(model.__class__, ClassificationModel):
-        demo = ClassificationDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    if issubclass(model.__class__, DetectionModel):
-        demo = DetectionDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    if issubclass(model.__class__, TextDetectionModel):
-        demo = TextDetectionDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
-    if issubclass(model.__class__, PoseModel):
-        demo = PoseDemo(model=model, host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    model_cfg = import_object(args.model)
+    model = model_cfg.build()
 
-    demo.run()
+    if issubclass(model.__class__, ClassificationModel):
+        demo = ClassificationDemo(host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    if issubclass(model.__class__, DetectionModel):
+        demo = DetectionDemo(host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    if issubclass(model.__class__, TextDetectionModel):
+        demo = TextDetectionDemo(host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+    if issubclass(model.__class__, PoseModel):
+        demo = PoseDemo(host=args.host, port=args.port, camera_device=args.camera_device, exclude_image=args.exclude_image)
+
+    demo.run(model)
 
 
 def main():

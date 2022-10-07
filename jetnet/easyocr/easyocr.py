@@ -48,8 +48,9 @@ from torch2trt import torch2trt, trt, TRTModule
 from torch2trt.dataset import FolderDataset
 
 import PIL.Image 
+from jetnet.config import Config
 from jetnet.dataset import Dataset
-from jetnet.image import Image, ImageDataset
+from jetnet.image import Image, ImageDataset, ImageDatasetConfig
 from jetnet.text_detection import TextDetectionModel, TextDetectionSet
 from jetnet.utils import make_parent_dir
 from jetnet.tensorrt import (
@@ -59,15 +60,10 @@ from jetnet.tensorrt import (
 )
 
 
-class EasyOCR(TextDetectionModel):
+class _EasyOCR(TextDetectionModel):
+    def __init__(self, reader):
+        self._reader = reader
     
-    lang_list: Sequence[str]
-
-    _reader = PrivateAttr()
-
-    def init(self):
-        self._reader = Reader(lang_list=self.lang_list)
-
     @torch.no_grad()
     def __call__(self, x: Image) -> TextDetectionSet:
         image = x
@@ -94,6 +90,13 @@ class EasyOCR(TextDetectionModel):
 
         return TextDetectionSet.construct(detections=detections)
 
+class EasyOCR(Config[_EasyOCR]):
+    
+    lang_list: Sequence[str]
+
+    def build(self):
+        return _EasyOCR(Reader(lang_list=self.lang_list))
+
 
 
 EASYOCR_TRT_DEFAULT_DETECTOR_CFG = Torch2trtConfig(
@@ -112,9 +115,9 @@ EASYOCR_TRT_DEFAULT_RECOGNIZER_CFG = Torch2trtConfig(
 )
 
 
-class EasyOCRTRT(TextDetectionModel):
+class EasyOCRTRT(Config[_EasyOCR]):
     model: EasyOCR
-    int8_calib_dataset: Optional[ImageDataset] = None
+    int8_calib_dataset: Optional[ImageDatasetConfig] = None
     detector_config: Optional[Torch2trtConfig] = EASYOCR_TRT_DEFAULT_DETECTOR_CFG
     recognizer_config: Optional[Torch2trtConfig] = EASYOCR_TRT_DEFAULT_RECOGNIZER_CFG
     
@@ -185,7 +188,7 @@ class EasyOCRTRT(TextDetectionModel):
 
         return module_trt
 
-    def init(self):
+    def build(self):
         model = self.model.build()
 
         if self.detector_config is not None:
@@ -201,8 +204,4 @@ class EasyOCRTRT(TextDetectionModel):
         if self.recognizer_config is not None:
             model._reader.recognizer.module = rec_trt
 
-        self.model = model
-        return self
-
-    def __call__(self, x: Image) -> TextDetectionSet:
-        return self.model(x)
+        return model

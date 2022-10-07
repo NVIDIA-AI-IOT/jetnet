@@ -27,9 +27,7 @@ class PoseProfileResult(ProfileResult):
 
 class PoseProfile(Profile):
 
-    def build(self) -> PoseProfileResult:
-        model = self.model.build()
-        dataset = self.dataset.build()
+    def run(self, model, dataset) -> PoseProfileResult:
 
         dataset_size = len(dataset)
         for i in range(self.num_warmup):

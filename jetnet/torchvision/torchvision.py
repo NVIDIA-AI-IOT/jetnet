@@ -31,46 +31,23 @@ from pydantic import PrivateAttr
 from typing import Tuple, Sequence, Literal, Optional
 
 from jetnet.imagenet import IMAGENET_LABELS
-from jetnet.image import Image, ImageDataset
+from jetnet.image import Image, ImageDataset, ImageDatasetConfig
 from jetnet.classification import Classification, ClassificationModel
 from jetnet.imagenet import IMAGENET_LABELS
 from jetnet.dataset import Dataset
 from jetnet.tensorrt import trt_calib_algo_from_str, Int8CalibAlgo
 from jetnet.utils import make_parent_dir
+from jetnet.config import Config
 
 
-class TorchvisionModel(ClassificationModel):
+class _TorchvisionModel(ClassificationModel):
 
-    name: Literal[
-        "resnet18",
-        "resnet34",
-        "resnet50",
-        "resnet101",
-        "resnet152",
-        "mobilenet_v2",
-        "densenet121",
-        "densenet161",
-        "densenet169",
-        "densenet201"
-    ]
-
-    input_size: Tuple[int, int] = (224, 224)
-    pretrained: bool = False
-    labels: Sequence[str] = IMAGENET_LABELS
-    device: Literal["cpu", "cuda"] = "cuda"
-
-    _module = PrivateAttr()
-    _device = PrivateAttr()
-    _normalize = PrivateAttr()
-    
-    def init(self):
-        self._device = torch.device(self.device)
-        module = getattr(torchvision.models, self.name)(pretrained=self.pretrained)
-        self._module = module.to(self._device).eval()
-        self._normalize = torchvision.transforms.Normalize(
-            [255.0 * 0.485, 255.0 * 0.456, 255.0 * 0.406],
-            [255.0 * 0.229, 255.0 * 0.224, 255.0 * 0.225],
-        ).to(self._device)
+    def __init__(self, module, device, normalize, input_size, labels):
+        self._module = module
+        self._device = device
+        self._normalize = normalize
+        self.input_size= input_size
+        self.labels = labels
 
     def get_labels(self):
         return self.labels
@@ -95,20 +72,51 @@ class TorchvisionModel(ClassificationModel):
                 label=label
             )
 
+class TorchvisionModel(Config[_TorchvisionModel]):
 
-class TorchvisionModelTRT(ClassificationModel):
+    name: Literal[
+        "resnet18",
+        "resnet34",
+        "resnet50",
+        "resnet101",
+        "resnet152",
+        "mobilenet_v2",
+        "densenet121",
+        "densenet161",
+        "densenet169",
+        "densenet201"
+    ]
+
+    input_size: Tuple[int, int] = (224, 224)
+    pretrained: bool = False
+    labels: Sequence[str] = IMAGENET_LABELS
+    device: Literal["cpu", "cuda"] = "cuda"
+
+    
+    def build(self):
+        device = torch.device(self.device)
+        module = getattr(torchvision.models, self.name)(pretrained=self.pretrained)
+        module = module.to(device).eval()
+        normalize = torchvision.transforms.Normalize(
+            [255.0 * 0.485, 255.0 * 0.456, 255.0 * 0.406],
+            [255.0 * 0.229, 255.0 * 0.224, 255.0 * 0.225],
+        ).to(device)
+        return _TorchvisionModel(module, device, normalize, self.input_size, self.labels)
+
+
+class TorchvisionModelTRT(Config[_TorchvisionModel]):
 
     model: TorchvisionModel
     int8_mode: bool = False
     fp16_mode: bool = False
     max_workspace_size: int = 1 << 25
     engine_cache: Optional[str] = None
-    int8_calib_dataset: Optional[ImageDataset] = None
+    int8_calib_dataset: Optional[ImageDatasetConfig] = None
     int8_calib_cache: Optional[str] = None
     int8_num_calib: int = 1
     int8_calib_algorithm: Int8CalibAlgo = "entropy_2"
 
-    def init(self):
+    def build(self):
 
         model = self.model.build()
 
@@ -116,8 +124,7 @@ class TorchvisionModelTRT(ClassificationModel):
             module = TRTModule()
             module.load_state_dict(torch.load(self.engine_cache))
             model._module = module
-            self.model = model
-            return self
+            return model
         
         if self.int8_mode:
             
@@ -164,11 +171,4 @@ class TorchvisionModelTRT(ClassificationModel):
             torch.save(module_trt.state_dict(), self.engine_cache)
 
         model._module = module_trt
-        self.model = model
-        return self
-
-    def get_labels(self):
-        return self.model.get_labels()
-
-    def __call__(self, x: Image) -> Classification:
-        return self.model(x)
+        return model
