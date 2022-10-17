@@ -5,3 +5,4 @@ __pycache__
 site
 build
 *.so
+*.mypy_cache
