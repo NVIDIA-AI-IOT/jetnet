@@ -4,16 +4,30 @@ from pydantic import BaseModel
 
 import os
 import torch
+import tempfile
+from progressbar import ProgressBar, Bar, Timer, ETA
 
 from torch2trt import torch2trt, trt, TRTModule
 from torch2trt.flattener import Flattener
+from torch2trt.dataset import FolderDataset
 
 from jetnet.utils import make_parent_dir
 
 Torch2trtCalibAlgo = Literal["legacy", "entropy", "entropy_2", "minmax"]
 Torch2trtLogLevel = Literal["verbose", "error", "info", "warning"]
+Torch2trtDeviceType = Literal["gpu", "dla"]
 
 
+def trt_device_type_from_str(s: Torch2trtDeviceType):
+    import tensorrt as trt
+    if s.lower() == "gpu":
+        return trt.DeviceType.GPU
+    elif s.lower() == "dla":
+        return trt.DeviceType.DLA
+    else:
+        raise ValueError(f"Unknown device type {s}.")
+
+    
 def trt_calib_algo_from_str(s: Torch2trtCalibAlgo):
     import tensorrt as trt
     if s == "legacy":
@@ -35,8 +49,6 @@ def trt_log_level_from_str(s: Torch2trtLogLevel):
     elif s == "error":
         return trt.Logger.ERROR
     elif s == "info":
-        return trt.Logger.INFO
-    elif s == "warning":
         return trt.Logger.WARNING
     elif s == "internal_error":
         return trt.Logger.INTERNAL_ERROR
@@ -52,11 +64,15 @@ class Torch2trtInputSpec(BaseModel):
 
 class Torch2trtEngineConfig(BaseModel):
     inputs: Any
+    int8_mode: bool = False
     fp16_mode: bool = False
     use_onnx: bool = False
     onnx_opset: int = 11
     log_level: Torch2trtLogLevel = "error"
+    default_device_type: Torch2trtDeviceType = "gpu"
     engine_cache: Optional[str] = None
+    calib_cache: Optional[str] = None
+    num_calib: int = 1
 
     def get_input_flattener(self):
         return Flattener.from_value(self.inputs, condition=lambda x: isinstance(x, Torch2trtInputSpec))
@@ -87,8 +103,10 @@ class Torch2trtEngineConfig(BaseModel):
 
 
 class Torch2trtModel(BaseModel):
+
     model: BaseModel
     engine_configs: Mapping[str, Torch2trtEngineConfig]
+    calib_dataset: Optional[BaseModel] = None
 
     def build(self):
         model = self.model.build()
@@ -102,6 +120,43 @@ class Torch2trtModel(BaseModel):
                     module_trt.load_state_dict(torch.load(engine_cache))
                     trt_modules[name] = module_trt
 
+        # generate cached data
+        calib_datasets = {}
+
+        if self.calib_dataset is not None \
+            and any(cfg.int8_mode for cfg in self.engine_configs.values()) \
+            and any(key not in trt_modules for key in self.engine_configs.keys()):
+
+            calib_dataset = self.calib_dataset.build()
+            calib_dataset_size = len(calib_dataset)
+            for name, config in self.engine_configs.items():
+
+                # skip cached models
+                if name in trt_modules:
+                    continue
+                
+                module = model.get_module(name)
+                calib_cache = tempfile.mkdtemp() if config.calib_cache is None else config.calib_cache
+                engine_calib_dataset = FolderDataset(calib_cache)
+                calib_datasets[name] = engine_calib_dataset
+
+                count = len(engine_calib_dataset)
+
+                pbar = ProgressBar(
+                    maxval=config.num_calib, 
+                    widgets=[f"Generating INT8 calibration data for {name}[", Timer(), "] ", Bar(), " (", ETA(), ")"])
+                pbar.start()
+
+                # run inference to record calibration data
+                while count < config.num_calib:
+                    with engine_calib_dataset.record(module):
+                        data = calib_dataset[count % calib_dataset_size]
+                        model(data)
+                    count += 1
+                    pbar.update(count)
+                pbar.finish()
+
+
         for name, config in self.engine_configs.items():
             if name in trt_modules:
                 continue # skip cached
@@ -111,12 +166,14 @@ class Torch2trtModel(BaseModel):
                 module,
                 inputs,
                 fp16_mode=config.fp16_mode,
+                int8_mode=config.int8_mode,
                 use_onnx=config.use_onnx,
                 onnx_opset=config.onnx_opset,
                 log_level=trt_log_level_from_str(config.log_level),
                 min_shapes=config.get_min_shapes(),
                 max_shapes=config.get_max_shapes(),
-                opt_shapes=config.get_opt_shapes()
+                opt_shapes=config.get_opt_shapes(),
+                default_device_type=trt_device_type_from_str(config.default_device_type)
             )
             trt_modules[name] = module_trt
             if config.engine_cache is not None:
