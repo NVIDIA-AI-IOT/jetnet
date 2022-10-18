@@ -40,9 +40,9 @@ class TextDetectionProfile(Profile):
             image = dataset[i % dataset_size]
             image_areas.append(image.width * image.height)
             time.sleep(self.sleep_interval)
-            t0 = time.monotonic()
+            t0 = time.perf_counter()
             output = model(image)
-            t1 = time.monotonic()
+            t1 = time.perf_counter()
             elapsed_time += (t1 - t0)
             num_detections.append(len(output.detections))
             num_characters.append(sum(len(p.text) for p in output.detections))

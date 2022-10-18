@@ -44,9 +44,9 @@ class Profile(BaseModel):
         for i in range(self.num_profile):
             image = dataset[i % dataset_size]
             time.sleep(self.sleep_interval)
-            t0 = time.monotonic()
+            t0 = time.perf_counter()
             model(image)
-            t1 = time.monotonic()
+            t1 = time.perf_counter()
             elapsed_time += (t1 - t0)
         fps = self.num_profile / elapsed_time
         result = ProfileResult(fps=fps)
@@ -58,7 +58,7 @@ def register_args(parser):
     parser.add_argument('dataset', type=str)
     parser.add_argument('--num_warmup', type=str, default=10)
     parser.add_argument('--num_profile', type=int, default=50)
-    parser.add_argument('--sleep_interval', type=int, default=0.01)
+    parser.add_argument('--sleep_interval', type=float, default=0.01)
 
 
 def run_args(args):
