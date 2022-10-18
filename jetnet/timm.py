@@ -56,6 +56,11 @@ def _make_pretrained_cfgs(name):
     cfg_trt_int8.engine_configs["module"].num_calib = 32
     cfg_trt_int8.calib_dataset = COCO2017_VAL_IMAGES
 
-    return cfg, cfg_trt, cfg_trt_fp16, cfg_trt_int8
+    cfg_trt_int8_dla = cfg_trt_int8.copy(deep=True)
+    cfg_trt_int8_dla.engine_configs["module"].engine_cache = f"data/timm/{name}_trt_int8_dla.pth"
+    cfg_trt_int8_dla.engine_configs["module"].default_device_type = "dla"
 
-RESNET18_IMAGENET, RESNET18_IMAGENET_TRT, RESNET18_IMAGENET_TRT_FP16, RESNET18_IMAGENET_TRT_INT8 = _make_pretrained_cfgs("resnet18")
+    return cfg, cfg_trt, cfg_trt_fp16, cfg_trt_int8, cfg_trt_int8_dla
+
+RESNET18_IMAGENET, RESNET18_IMAGENET_TRT, RESNET18_IMAGENET_TRT_FP16, RESNET18_IMAGENET_TRT_INT8, \
+    RESNET18_IMAGENET_TRT_INT8_DLA = _make_pretrained_cfgs("resnet18")
