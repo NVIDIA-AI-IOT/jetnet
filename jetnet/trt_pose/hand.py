@@ -14,7 +14,12 @@
 # limitations under the License.
 
 import jetnet.coco
-from jetnet.trt_pose.trt_pose import TRTPose, TRTPoseTRT
+from jetnet.trt_pose.trt_pose import TRTPose
+from jetnet.torch2trt import (
+    Torch2trtModel,
+    Torch2trtInputSpec,
+    Torch2trtEngineConfig
+)
 
 
 HAND_KEYPOINTS = [
@@ -66,7 +71,7 @@ HAND_SKELETON = [
 ]
 
 def _create_cfgs(_base_alias, _input_size, _model_name, _weights_url):
-    _cfg = TRTPose(
+    cfg = TRTPose(
         model=_model_name,
         input_size=_input_size,
         keypoints=HAND_KEYPOINTS,
@@ -74,17 +79,38 @@ def _create_cfgs(_base_alias, _input_size, _model_name, _weights_url):
         weights_url=_weights_url,
         weights_path=f"data/trt_pose/{_base_alias}.pth"
     )
-    _cfg_trt = TRTPoseTRT(
-        model=_cfg,
-        int8_calib_cache=f"data/trt_pose/{_base_alias}_calib",
-        engine_cache=f"data/trt_pose/{_base_alias}_trt.pth",
-        int8_num_calib=512,
-        int8_calib_dataset=jetnet.coco.COCO2017_VAL_IMAGES
+    cfg_trt = Torch2trtModel(
+        model=cfg,
+        engine_configs={
+            "module": Torch2trtEngineConfig(
+                inputs=[
+                    Torch2trtInputSpec(
+                        min_shape=[1, 3, _input_size[1], _input_size[0]],
+                        max_shape=[1, 3, _input_size[1], _input_size[0]],
+                        opt_shape=[1, 3, _input_size[1], _input_size[0]]
+                    )
+                ],
+                engine_cache=f"data/trt_pose/{_base_alias}_trt.pth",
+                use_onnx=True
+            )
+        }
     )
-    _cfg_trt_fp16 = _cfg_trt.copy(update={"fp16_mode": True, "engine_cache": f"data/trt_pose/{_base_alias}_trt_fp16.pth"})
-    _cfg_trt_int8 = _cfg_trt.copy(update={"int8_mode": True, "engine_cache": f"data/trt_pose/{_base_alias}_trt_int8.pth"})
+    cfg_trt_fp16 = cfg_trt.copy(deep=True)
+    cfg_trt_fp16.engine_configs["module"].fp16_mode = True
+    cfg_trt_fp16.engine_configs["module"].engine_cache = f"data/trt_pose/{_base_alias}_trt_fp16.pth"
 
-    return _cfg, _cfg_trt, _cfg_trt_fp16, _cfg_trt_int8
+    cfg_trt_int8 = cfg_trt.copy(deep=True)
+    cfg_trt_int8.engine_configs["module"].int8_mode = True
+    cfg_trt_int8.engine_configs["module"].engine_cache = f"data/trt_pose/{_base_alias}_trt_int8.pth"
+    cfg_trt_int8.engine_configs["module"].num_calib = 512
+    cfg_trt_int8.engine_configs["module"].calib_cache = f"data/trt_pose/{_base_alias}_calib"
+    cfg_trt_int8.calib_dataset = jetnet.coco.COCO2017_VAL_IMAGES
+
+    cfg_trt_int8_dla = cfg_trt_int8.copy(deep=True)
+    cfg_trt_int8_dla.engine_configs["module"].engine_cache = f"data/trt_pose/{_base_alias}_trt_int8_dla.pth"
+    cfg_trt_int8_dla.engine_configs["module"].default_device_type = "dla"
+
+    return cfg, cfg_trt, cfg_trt_fp16, cfg_trt_int8, cfg_trt_int8_dla
 
 
 RESNET18_HAND_224X224, RESNET18_HAND_224X224_TRT, RESNET18_HAND_224X224_TRT_FP16, RESNET18_HAND_224X224_TRT_INT8 = \
