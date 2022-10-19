@@ -78,3 +78,5 @@ RUN pip install progressbar
 
 RUN pip install mkdocs mkdocs-material mkdocs-macros-plugin
 RUN pip install pybind11 msgpack
+
+RUN pip install timm

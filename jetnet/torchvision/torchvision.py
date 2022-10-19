@@ -42,10 +42,13 @@ from jetnet.config import Config
 
 class _TorchvisionModel(ClassificationModel):
 
-    def __init__(self, module, device, normalize, input_size, labels):
+    def __init__(self, module, device, input_size, labels):
         self._module = module
         self._device = device
-        self._normalize = normalize
+        self._normalize = torchvision.transforms.Normalize(
+            [255.0 * 0.485, 255.0 * 0.456, 255.0 * 0.406],
+            [255.0 * 0.229, 255.0 * 0.224, 255.0 * 0.225],
+        ).to(device)
         self.input_size= input_size
         self.labels = labels
 
@@ -62,7 +65,8 @@ class _TorchvisionModel(ClassificationModel):
             )
             tensor = F.interpolate(tensor[None, ...], size=self.input_size[::-1])
             tensor = self._normalize(tensor[0])
-            output = self._module(tensor[None, ...]).cpu()
+            output = self._module(tensor[None, ...])
+            output = torch.softmax(output, dim=-1).cpu()
             index = int(torch.argmax(output[0]))
             score = float(output[0, index])
             label = self.get_labels()[index]
@@ -71,6 +75,22 @@ class _TorchvisionModel(ClassificationModel):
                 score=score,
                 label=label
             )
+
+    def module_names(self):
+        return ["module"]
+    
+    def get_module(self, name) -> torch.nn.Module:
+        if name == 'module':
+            return self._module
+        else:
+            raise ValueError("Invalid module name")
+
+    def set_module(self, name, value):
+        if name == 'module':
+            self._module = value
+        else:
+            raise ValueError("Invalid module name")
+
 
 class TorchvisionModel(Config[_TorchvisionModel]):
 
@@ -97,11 +117,7 @@ class TorchvisionModel(Config[_TorchvisionModel]):
         device = torch.device(self.device)
         module = getattr(torchvision.models, self.name)(pretrained=self.pretrained)
         module = module.to(device).eval()
-        normalize = torchvision.transforms.Normalize(
-            [255.0 * 0.485, 255.0 * 0.456, 255.0 * 0.406],
-            [255.0 * 0.229, 255.0 * 0.224, 255.0 * 0.225],
-        ).to(device)
-        return _TorchvisionModel(module, device, normalize, self.input_size, self.labels)
+        return _TorchvisionModel(module, device, self.input_size, self.labels)
 
 
 class TorchvisionModelTRT(Config[_TorchvisionModel]):

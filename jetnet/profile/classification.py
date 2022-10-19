@@ -36,9 +36,9 @@ class ClassificationProfile(Profile):
             image = dataset[i % dataset_size]
             image_areas.append(image.width * image.height)
             time.sleep(self.sleep_interval)
-            t0 = time.monotonic()
+            t0 = time.perf_counter()
             model(image)
-            t1 = time.monotonic()
+            t1 = time.perf_counter()
             elapsed_time += (t1 - t0)
         fps = self.num_profile / elapsed_time
         avg_image_size = sum(image_areas) / len(image_areas)

@@ -114,6 +114,17 @@ class _TRTPose(PoseModel):
 
             return PoseSet.construct(poses=poses)
 
+    def get_module(self, name) -> torch.nn.Module:
+        if name == 'module':
+            return self._module
+        else:
+            raise ValueError("Invalid module name")
+
+    def set_module(self, name, value):
+        if name == 'module':
+            self._module = value
+        else:
+            raise ValueError("Invalid module name")
 
 class TRTPose(Config[_TRTPose]):
 
