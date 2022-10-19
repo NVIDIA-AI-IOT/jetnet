@@ -155,7 +155,8 @@ class Torch2trtModel(BaseModel):
                     count += 1
                     pbar.update(count)
                 pbar.finish()
-
+        else:
+            calib_datasets = {name: None for name in self.engine_configs.keys()}
 
         for name, config in self.engine_configs.items():
             if name in trt_modules:
@@ -173,7 +174,8 @@ class Torch2trtModel(BaseModel):
                 min_shapes=config.get_min_shapes(),
                 max_shapes=config.get_max_shapes(),
                 opt_shapes=config.get_opt_shapes(),
-                default_device_type=trt_device_type_from_str(config.default_device_type)
+                default_device_type=trt_device_type_from_str(config.default_device_type),
+                int8_calib_dataset=calib_datasets[name]
             )
             trt_modules[name] = module_trt
             if config.engine_cache is not None:
