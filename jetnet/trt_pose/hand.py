@@ -113,7 +113,7 @@ def _create_cfgs(_base_alias, _input_size, _model_name, _weights_url):
     return cfg, cfg_trt, cfg_trt_fp16, cfg_trt_int8, cfg_trt_int8_dla
 
 
-RESNET18_HAND_224X224, RESNET18_HAND_224X224_TRT, RESNET18_HAND_224X224_TRT_FP16, RESNET18_HAND_224X224_TRT_INT8 = \
+RESNET18_HAND_224X224, RESNET18_HAND_224X224_TRT, RESNET18_HAND_224X224_TRT_FP16, RESNET18_HAND_224X224_TRT_INT8, RESNET18_HAND_224X224_TRT_INT8_DLA = \
     _create_cfgs(
         "resnet18_hand_224x224", 
         (224, 224), 
