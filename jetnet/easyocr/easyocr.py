@@ -93,9 +93,10 @@ class _EasyOCR(TextDetectionModel):
 class EasyOCR(Config[_EasyOCR]):
     
     lang_list: Sequence[str]
+    model_storage_directory: str = "data/easyocr/modules"
 
     def build(self):
-        return _EasyOCR(Reader(lang_list=self.lang_list))
+        return _EasyOCR(Reader(lang_list=self.lang_list, model_storage_directory=self.model_storage_directory))
 
 
 
