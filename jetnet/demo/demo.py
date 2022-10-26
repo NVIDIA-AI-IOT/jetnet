@@ -24,6 +24,7 @@ import PIL.Image
 import json
 import numpy as np
 import socketio
+import time
 from typing import Union
 
 from pydantic import BaseModel, PrivateAttr
@@ -56,6 +57,7 @@ class Demo(BaseModel):
     port: int = 8000
     camera_device: int = 0
     exclude_image: bool = False
+    fps_window_size: int = 1
 
     _model = PrivateAttr()
     _running = PrivateAttr(default=False)
@@ -125,8 +127,12 @@ class Demo(BaseModel):
             image_orig = image
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             image = PIL.Image.fromarray(image)
-            output = self.model(image)
 
+            t0 = time.perf_counter()
+            output = self.model(image)
+            t1 = time.perf_counter()
+
+            fps = 1.0 / (t1 - t0)
             # full_mask = np.zeros(image_orig.shape[0:2], dtype=np.uint8)
             # for det in output.detections:
             #     if hasattr(det, 'mask') and det.mask is not None:
@@ -137,7 +143,8 @@ class Demo(BaseModel):
             #     det.mask = None
 
             data = {
-                "output": output.dict()
+                "output": output.dict(),
+                "fps": fps
             }
 
             if not self.exclude_image:
