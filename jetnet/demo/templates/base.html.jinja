@@ -1,8 +1,8 @@
 <html>
     <head>
-        <script src="https://cdn.socket.io/4.5.0/socket.io.min.js" integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k" crossorigin="anonymous"></script>
-        <script src="https://unpkg.com/konva@8/konva.min.js"></script>
-        <script crossorigin src="https://unpkg.com/@msgpack/msgpack"></script>
+        <script src="{{ url_for('static', path='/socket.io.min.js') }}" integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k" crossorigin="anonymous"></script>
+        <script src="{{ url_for('static', path='/konva.min.js') }}"></script>
+        <script src="{{ url_for('static', path='/msgpack.min.js') }}"></script>
         <script>
             var socket = io(":{{port}}", {path: "/ws/socket.io"});
         </script>
