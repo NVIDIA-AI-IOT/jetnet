@@ -38,6 +38,9 @@
                 var overlayLayer = new Konva.Layer();
                 stage.add(overlayLayer);
 
+                var fpsLayer = new Konva.Layer();
+                stage.add(fpsLayer);
+
                 var imageObj = new Image();
                 var canvas = document.getElementById("display");
 
@@ -78,6 +81,33 @@
                     if ("image" in data_decoded) {
                         imageObj.src = jpegToBase64(data_decoded["image"]);
                     }
+
+                    if ("fps" in data_decoded) {
+                        fpsLayer.find("Text").forEach((x) => {x.destroy();});
+                        fpsLayer.find("Label").forEach((x) => {x.destroy();});
+                        var labelFps = new Konva.Label({
+                            x: image_shape.width - 128,
+                            y: 16,
+                            opacity: 0.75
+                        });
+
+                        var tagFps = new Konva.Tag({
+                            fill: '#76b900'
+                        });
+
+                        var textFps = new Konva.Text({
+                            text: "FPS: " + data_decoded["fps"].toFixed(1),
+                            fontSize: 24,
+                            fontFamily: 'Calibri',
+                            fill: 'white',
+                            padding: 8
+                        });
+                        labelFps.add(tagFps);
+                        labelFps.add(textFps);
+                        fpsLayer.add(labelFps);
+                        fpsLayer.draw();
+                    }
+
                     {% block output %}{% endblock %}
                 });
 
