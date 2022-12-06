@@ -21,10 +21,10 @@ v4l2-ctl --list-devices
 For your webcam to be `/dev/video0`, create a v4l2loopback device with device ID `10` (incremented by 10).
 
 ```bash
-sudo modprobe v4l2loopback video_nr=10 exclusive_caps=1 card_label="Webcam alias"
+sudo modprobe v4l2loopback video_nr=10 exclusive_caps=1 card_label="Virtual webcam"
 ```
 
-You should find `/dev/video10` created.
+You should find `/dev/video10` got created.
 
 ### Start streaming to the v4l2loopback device
 
@@ -33,14 +33,13 @@ On a terminal, run the following.
 #### Terminal 0
 
 ```bash
-export JPG_WIDTH=640
-export JPG_HEIGHT=480
-gst-launch-1.0 -v v4l2src device=/dev/video0 ! 'video/x-raw, format=YUY2, width=640, height=480, framerate=30/1' ! nvvidconv ! "video/x-raw(memory:NVMM), height=${JPG_HEIGHT}, width=${JPG_WIDTH}, format=I420" ! nvjpegenc ! multipartmux ! multipartdemux single-stream=1 ! "image/jpeg, width=${JPG_WIDTH}, height=${JPG_HEIGHT}, parsed=(boolean)true, colorimetry=(string)2:4:7:1, framerate=(fraction)30/1,sof-marker=(int)0" ! v4l2sink device=/dev/video10
+ffmpeg -f v4l2 -i /dev/video0 -f v4l2 /dev/video10
 ```
-This will keep running, so leave the terminal open.
+
+This will keep running, so leave this terminal open.
 
 
-## 
+## Run JetNet containers
 
 Example of running two containers;
 
@@ -92,3 +91,7 @@ sudo docker run \
 Open a web browser and access `http://<IP_ADDRESS>:8081`.
 
 > If you are using the same Jetson to run the web browser, it is `http://0.0.0.0:8081`
+
+## Result
+
+![](./assets/two-containers.png)
