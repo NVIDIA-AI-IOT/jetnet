@@ -1,6 +1,6 @@
 This tutorial details how to run multiple JetNet containers asynchronously with a single webcam as a shared input.
 
-![](/assets/two-containers.png)
+![](../assets/two-containers.png)
 
 ## Step 1 - Setup a V4L2 loopback device (virtual camera)
 
@@ -89,6 +89,6 @@ Open a web browser and access `http://<IP_ADDRESS>:8081`.
 
 Once both containers are open, you should be able to view the detetections in separate browser tabs like this.
 
-![](/assets/two-containers.png)
+![](../assets/two-containers.png)
 
 That's all for this tutorial!  If you run into any issues, feel free to open an issue on GitHub.
