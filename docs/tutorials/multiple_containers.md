@@ -1,8 +1,8 @@
-This page details setup steps for running multiple JetNet containers with a webcam as a shared input
+This tutorial details how to run multiple JetNet containers asynchronously with a single webcam as a shared input.
 
-## Webcam loopback setup
+![](/assets/two-containers.png)
 
-### V4L2 loopback device creation
+## Step 1 - Setup a V4L2 loopback device (virtual camera)
 
 To share a webcam across multiple containers, set up a v4l2loopback device.  First, install some dependencies
 
@@ -26,9 +26,7 @@ sudo modprobe v4l2loopback video_nr=10 exclusive_caps=1 card_label="Virtual webc
 
 You should find `/dev/video10` got created.  You can verify this again by calling ``v4l2-ctl --list-devices``.
 
-### Start streaming to the v4l2loopback device
-
-#### Terminal 0
+## Step 2 - Link the real camera to the loopback device
 
 In one terminal, use ffmpeg to stream the real camera device (which we'll assume is ``/dev/video0``) to the virtual camera we created ``/dev/video10``
 
@@ -39,16 +37,9 @@ ffmpeg -f v4l2 -i /dev/video0 -f v4l2 /dev/video10
 This will keep running, so leave this terminal open.
 
 
-## Run JetNet containers
+## Step 3 - Run an object detection container on the loopback camera
 
-Example of running two containers;
-
-- one for demo-ing `jetnet demo jetnet.yolox.YOLOX_NANO_TRT_FP16` and,
-- the other for demo-ing `jetnet.easyocr.EASYOCR_EN_TRT_FP16`
-
-#### Terminal 1
-
-Open a new terminal, and launch the first container for object detection.  We'll assume the working directory is the root of the cloned ``jetnet`` repository.
+In a new terminal, and launch the first container for object detection.  We'll assume the working directory is the root of the cloned ``jetnet`` repository.
 
 ```bash
 sudo docker run \
@@ -70,9 +61,9 @@ Open a web browser and access `http://<IP_ADDRESS>:8080`.
 
 > If you are using the same Jetson to run the web browser, it is `http://0.0.0.0:8080`
 
-#### Terminal 2
+## Step 4 - Run a text detection container on the original camera
 
-Open another terminal, and launch the second container for text detection.  Notice that we use a different port.
+In another new terminal, and launch the second container for text detection.  Notice that we use a different port.
 
 ```bash 
 sudo docker run \
@@ -96,4 +87,8 @@ Open a web browser and access `http://<IP_ADDRESS>:8081`.
 
 ## Result
 
-![](./assets/two-containers.png)
+Once both containers are open, you should be able to view the detetections in separate browser tabs like this.
+
+![](/assets/two-containers.png)
+
+That's all for this tutorial!  If you run into any issues, feel free to open an issue on GitHub.

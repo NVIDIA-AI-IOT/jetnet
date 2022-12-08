@@ -34,6 +34,8 @@ nav:
   - Tools: tools.md
   - Models: models.md
   - Datasets: datasets.md
+  - Tutorials:
+    - Run multiple containers at once: tutorials/multiple_containers.md
   - Python: 
     - Usage: python/usage.md
     - Reference: python/reference.md
