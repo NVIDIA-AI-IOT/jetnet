@@ -8,7 +8,7 @@ To share a webcam across multiple containers, set up a v4l2loopback device.
 
 ```bash
 sudo apt-get update
-sudo apt-get install v4l2loopback-dkms
+sudo apt-get install v4l2loopback-dkms v4l-utils
 ```
 
 Attach your webcam to Jetson and check if it's detected on your Jetson.
