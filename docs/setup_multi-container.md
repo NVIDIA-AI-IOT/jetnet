@@ -11,14 +11,14 @@ sudo apt-get update
 sudo apt-get install v4l2loopback-dkms v4l-utils ffmpeg
 ```
 
-Attach your webcam to Jetson and check if it's detected on your Jetson.
+Check which camera devices are currently on the system.
 
 ```bash
 ls /dev/video*
 v4l2-ctl --list-devices
 ```
 
-For your webcam to be `/dev/video0`, create a v4l2loopback device with an unused device ID.  We'll use device `10` (incremented by 10).
+Create a v4l2loopback device with an unused device ID.  We'll assume device ID `10` is unused.
 
 ```bash
 sudo modprobe v4l2loopback video_nr=10 exclusive_caps=1 card_label="Virtual webcam"
@@ -28,9 +28,9 @@ You should find `/dev/video10` got created.  You can verify this again by callin
 
 ### Start streaming to the v4l2loopback device
 
-On a terminal, run the following.
-
 #### Terminal 0
+
+In one terminal, use ffmpeg to stream the real camera device, which we'll assume is ``/dev/video0`` to the virtual camera we created ``/dev/video10``
 
 ```bash
 ffmpeg -f v4l2 -i /dev/video0 -f v4l2 /dev/video10
@@ -47,6 +47,8 @@ Example of running two containers;
 - the other for demo-ing `jetnet.easyocr.EASYOCR_EN_TRT_FP16`
 
 #### Terminal 1
+
+Open a new terminal, and launch the first container for object detection.
 
 ```bash
 cd jetnet
@@ -70,6 +72,8 @@ Open a web browser and access `http://<IP_ADDRESS>:8080`.
 > If you are using the same Jetson to run the web browser, it is `http://0.0.0.0:8080`
 
 #### Terminal 2
+
+Open another terminal, and launch the second container for text detection.  Notice that we use a different port.
 
 ```bash 
 cd jetnet
