@@ -87,7 +87,7 @@ Open a web browser and access `http://<IP_ADDRESS>:8081`.
 
 ## Result
 
-Once both containers are open, you should be able to view the detetections in separate browser tabs like this.
+Once both containers are open, you should be able to view the outputs in separate browser tabs like this.
 
 ![](../assets/two-containers.png)
 
