@@ -1,7 +1,0 @@
-{
-  "path": "data/textocr/textocr_train_images/train_images",
-  "recursive": false,
-  "zip_url": "https://dl.fbaipublicfiles.com/textvqa/images/train_val_images.zip",
-  "zip_folder": "train_images",
-  "zip_file": "data/textocr/textocr_train_images/train_val_images.zip"
-}

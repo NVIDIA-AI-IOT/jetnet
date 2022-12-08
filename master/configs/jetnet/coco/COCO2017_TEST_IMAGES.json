@@ -1,7 +1,0 @@
-{
-  "path": "data/coco/test2017",
-  "recursive": false,
-  "zip_url": "http://images.cocodataset.org/zips/test2017.zip",
-  "zip_folder": "test2017",
-  "zip_file": "data/datasets/coco/test2017.zip"
-}

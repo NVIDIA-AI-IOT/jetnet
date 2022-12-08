@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.5.3">
+      <meta name="generator" content="mkdocs-1.4.0, mkdocs-material-8.5.6">
     
     
       
@@ -17,7 +17,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.7a952b86.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.20d9efc8.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
@@ -282,6 +282,54 @@
 
   
   
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/multiple_containers/" class="md-nav__link">
+        Run multiple containers at once
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
     
   
   
@@ -289,18 +337,18 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" checked>
       
       
       
       
-        <label class="md-nav__link" for="__nav_6">
+        <label class="md-nav__link" for="__nav_7">
           Python
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Python" data-md-level="1">
-        <label class="md-nav__title" for="__nav_6">
+        <label class="md-nav__title" for="__nav_7">
           <span class="md-nav__icon md-icon"></span>
           Python
         </label>
@@ -377,13 +425,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#define-a-custom-model-class" class="md-nav__link">
-    Define a custom model class
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -414,20 +455,6 @@
           <li class="md-nav__item">
   <a href="#read-a-sample" class="md-nav__link">
     Read a sample
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#use-your-own-images" class="md-nav__link">
-    Use your own images
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#define-a-custom-dataset-class" class="md-nav__link">
-    Define a custom dataset class
   </a>
   
 </li>
@@ -526,13 +553,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#define-a-custom-model-class" class="md-nav__link">
-    Define a custom model class
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -563,20 +583,6 @@
           <li class="md-nav__item">
   <a href="#read-a-sample" class="md-nav__link">
     Read a sample
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#use-your-own-images" class="md-nav__link">
-    Use your own images
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#define-a-custom-dataset-class" class="md-nav__link">
-    Define a custom dataset class
   </a>
   
 </li>
@@ -794,80 +800,21 @@
 
 </details>
 
-<h3 id="define-a-custom-model-class">Define a custom model class</h3>
-<p>You can create your own model by subclassing the related base model for the task. For example,</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">PrivateAttr</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">class</span> <span class="nc">CatDogModel</span><span class="p">(</span><span class="n">ClassificationModel</span><span class="p">):</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">num_layers</span><span class="p">:</span> <span class="nb">int</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="c1"># private attributes can be non-JSON types, like a PyTorch module</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="n">_torch_module</span> <span class="o">=</span> <span class="n">PrivateAttr</span><span class="p">()</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>        <span class="c1"># code to initialize model for execution</span>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>    <span class="k">def</span> <span class="nf">get_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;cat&quot;</span><span class="p">,</span> <span class="s2">&quot;dog&quot;</span><span class="p">]</span>
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>
-<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Image</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Classification</span><span class="p">:</span>
-<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>        <span class="c1"># code to classify image</span>
-</code></pre></div>
-<p>You can then define some instances of your model</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">CAT_DOG_SMALL</span> <span class="o">=</span> <span class="n">CatDogModel</span><span class="p">(</span><span class="n">num_layers</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">CAT_DOG_BIG</span> <span class="o">=</span> <span class="n">CatDogModel</span><span class="p">(</span><span class="n">num_layers</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
-</code></pre></div>
-<p>If the model can be imported in Python, it can be used
-with the command line tools.  Suppose we have our models defined in <code>./cat_dog.py</code>,
-we could use a model like this</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">jetnet</span> <span class="n">demo</span> <span class="n">cat_dog</span><span class="o">.</span><span class="n">CAT_DOG_SMALL</span>
-</code></pre></div>
 <h2 id="dataset-usage">Dataset usage</h2>
 <h3 id="build-a-dataset">Build a dataset</h3>
 <p>First, you build the dataset like this</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span> <span class="nn">jetnet.coco</span> <span class="kn">import</span> <span class="n">COCO2017_VAL_IMAGES</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">COCO2017_VAL_IMAGES</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span> <span class="nn">jetnet.coco</span> <span class="kn">import</span> <span class="n">COCO2017_VAL_IMAGES</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">COCO2017_VAL_IMAGES</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="get-the-size">Get the size</h3>
 <p>Once the dataset is built, you can determine the size
 of the dataset using the <code>len</code> method like this</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="read-a-sample">Read a sample</h3>
 <p>To read a sample from the dataset, do this</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">image</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</code></pre></div>
-<h3 id="use-your-own-images">Use your own images</h3>
-<p>If you have images in a folder, you can create a dataset
-for them like this</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">CAT_DOG_IMAGES</span> <span class="o">=</span> <span class="n">ImageFolder</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;images&quot;</span><span class="p">)</span>
-</code></pre></div>
-<p>Assuming this is defined in <code>./cat_dog.py</code> you could then
-use it with the command line tools like this</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">jetnet</span> <span class="n">profile</span> <span class="n">cat_dog</span><span class="o">.</span><span class="n">CAT_DOG_SMALL</span> <span class="n">cat_dog</span><span class="o">.</span><span class="n">CAT_DOG_IMAGES</span>
-</code></pre></div>
-<blockquote>
-<p>It's worth checking out the RemoteImageFolder, so
-you can store your images remotely, and automatically
-download it.  This will make your dataset more reproducible.</p>
-</blockquote>
-<h3 id="define-a-custom-dataset-class">Define a custom dataset class</h3>
-<p>If the pre-made dataset classes don't fit your use case, you
-can create your own dataset class like this</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span> <span class="nn">jetnet.image</span> <span class="kn">import</span> <span class="n">ImageDataset</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="k">class</span> <span class="nc">CatDogImages</span><span class="p">(</span><span class="n">ImageDataset</span><span class="p">):</span>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>        <span class="c1"># code to prepare dataset for reading, ie: downloading data</span>
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>
-<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>        <span class="c1"># code to get length of dataset</span>
-<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>
-<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
-<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>        <span class="c1"># code to read sample from dataset</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">image</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </code></pre></div>
 
 
@@ -891,7 +838,7 @@ can create your own dataset class like this</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../../datasets/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Datasets" rel="prev">
+        <a href="../../tutorials/multiple_containers/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Run multiple containers at once" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -900,7 +847,7 @@ can create your own dataset class like this</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Datasets
+              Run multiple containers at once
             </div>
           </div>
         </a>
@@ -947,7 +894,7 @@ can create your own dataset class like this</p>
     <script id="__config" type="application/json">{"base": "../..", "features": ["content.tabs.link", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.5bf1dace.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.37e9125f.min.js"></script>
+      <script src="../../assets/javascripts/bundle.078830c0.min.js"></script>
       
     
   </body>

@@ -114,18 +114,46 @@
     "weights_path": "data/trt_pose/resnet18_hand_224x224.pth",
     "device": "cuda"
   },
-  "int8_mode": true,
-  "fp16_mode": false,
-  "max_workspace_size": 33554432,
-  "engine_cache": "data/trt_pose/resnet18_hand_224x224_trt_int8.pth",
-  "int8_calib_dataset": {
+  "engine_configs": {
+    "module": {
+      "inputs": [
+        {
+          "min_shape": [
+            1,
+            3,
+            224,
+            224
+          ],
+          "max_shape": [
+            1,
+            3,
+            224,
+            224
+          ],
+          "opt_shape": [
+            1,
+            3,
+            224,
+            224
+          ]
+        }
+      ],
+      "int8_mode": true,
+      "fp16_mode": false,
+      "use_onnx": true,
+      "onnx_opset": 11,
+      "log_level": "error",
+      "default_device_type": "gpu",
+      "engine_cache": "data/trt_pose/resnet18_hand_224x224_trt_int8.pth",
+      "calib_cache": "data/trt_pose/resnet18_hand_224x224_calib",
+      "num_calib": 512
+    }
+  },
+  "calib_dataset": {
     "path": "data/coco/val2017",
     "recursive": false,
     "zip_url": "http://images.cocodataset.org/zips/val2017.zip",
     "zip_folder": "val2017",
     "zip_file": "data/coco/val2017.zip"
-  },
-  "int8_calib_cache": "data/trt_pose/resnet18_hand_224x224_calib",
-  "int8_num_calib": 512,
-  "int8_calib_algorithm": "entropy_2"
+  }
 }

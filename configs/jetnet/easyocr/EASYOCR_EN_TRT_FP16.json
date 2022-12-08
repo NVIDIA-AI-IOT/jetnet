@@ -2,7 +2,8 @@
   "model": {
     "lang_list": [
       "en"
-    ]
+    ],
+    "model_storage_directory": "data/easyocr/modules"
   },
   "int8_calib_dataset": {
     "path": "data/textocr/textocr_test_images/test_images",

@@ -1,5 +1,6 @@
 {
   "lang_list": [
     "en"
-  ]
+  ],
+  "model_storage_directory": "data/easyocr/modules"
 }

@@ -1,7 +1,0 @@
-{
-  "path": "data/textocr/textocr_test_images/test_images",
-  "recursive": false,
-  "zip_url": "https://dl.fbaipublicfiles.com/textvqa/images/test_images.zip",
-  "zip_folder": "test_images",
-  "zip_file": "data/textocr/textocr_test_images/test_images.zip"
-}
