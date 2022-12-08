@@ -18,13 +18,13 @@ ls /dev/video*
 v4l2-ctl --list-devices
 ```
 
-For your webcam to be `/dev/video0`, create a v4l2loopback device with device ID `10` (incremented by 10).
+For your webcam to be `/dev/video0`, create a v4l2loopback device with an unused device ID.  We'll use device `10` (incremented by 10).
 
 ```bash
 sudo modprobe v4l2loopback video_nr=10 exclusive_caps=1 card_label="Virtual webcam"
 ```
 
-You should find `/dev/video10` got created.
+You should find `/dev/video10` got created.  You can verify this again by calling ``v4l2-ctl --list-devices``.
 
 ### Start streaming to the v4l2loopback device
 
