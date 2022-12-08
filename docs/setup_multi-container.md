@@ -48,10 +48,9 @@ Example of running two containers;
 
 #### Terminal 1
 
-Open a new terminal, and launch the first container for object detection.
+Open a new terminal, and launch the first container for object detection.  We'll assume the working directory is the root of the cloned ``jetnet`` repository.
 
 ```bash
-cd jetnet
 sudo docker run \
     --network host \
     --gpus all \
@@ -76,7 +75,6 @@ Open a web browser and access `http://<IP_ADDRESS>:8080`.
 Open another terminal, and launch the second container for text detection.  Notice that we use a different port.
 
 ```bash 
-cd jetnet
 sudo docker run \
     --network host \
     --gpus all \
