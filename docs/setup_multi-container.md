@@ -4,7 +4,7 @@ This page details setup steps for running multiple JetNet containers with a webc
 
 ### V4L2 loopback device creation
 
-To share a webcam across multiple containers, set up a v4l2loopback device.
+To share a webcam across multiple containers, set up a v4l2loopback device.  First, install some dependencies
 
 ```bash
 sudo apt-get update
