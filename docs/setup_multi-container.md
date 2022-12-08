@@ -30,7 +30,7 @@ You should find `/dev/video10` got created.  You can verify this again by callin
 
 #### Terminal 0
 
-In one terminal, use ffmpeg to stream the real camera device, which we'll assume is ``/dev/video0`` to the virtual camera we created ``/dev/video10``
+In one terminal, use ffmpeg to stream the real camera device (which we'll assume is ``/dev/video0``) to the virtual camera we created ``/dev/video10``
 
 ```bash
 ffmpeg -f v4l2 -i /dev/video0 -f v4l2 /dev/video10
